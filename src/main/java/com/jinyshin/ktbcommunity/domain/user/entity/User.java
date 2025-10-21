@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE user_id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class User extends BaseEntity {
 
     @Id
@@ -45,5 +47,15 @@ public class User extends BaseEntity {
         this.email = email;
         this.nickname = nickname;
         this.passwordHash = passwordHash;
+    }
+
+    // 비즈니스 메서드
+    public void updateProfile(String nickname, Image profileImage) {
+        this.nickname = nickname;
+        this.profileImage = profileImage;
+    }
+
+    public void updatePassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
     }
 }
