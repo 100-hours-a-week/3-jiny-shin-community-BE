@@ -1,8 +1,13 @@
 package com.jinyshin.ktbcommunity.domain.user.controller;
 
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.EMAIL_CHECKED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.NICKNAME_CHECKED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PASSWORD_UPDATED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PROFILE_UPDATED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.SIGNUP_SUCCESS;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.USER_RETRIEVED;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
 
 import com.jinyshin.ktbcommunity.domain.user.dto.request.PasswordUpdateRequest;
 import com.jinyshin.ktbcommunity.domain.user.dto.request.ProfileUpdateRequest;
@@ -37,17 +42,14 @@ public class UserController {
   public ResponseEntity<ApiResponse<UserInfoResponse>> signup(
       @Valid @RequestBody SignupRequest request) {
     UserInfoResponse response = userService.signup(request);
-    return new ResponseEntity<>(
-        ApiResponse.success("signup_success", response),
-        CREATED
-    );
+    return ResponseEntity.status(CREATED).body(ApiResponse.success(SIGNUP_SUCCESS, response));
   }
 
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<UserInfoResponse>> getMyInfo(
       @AuthenticationPrincipal CustomUserPrincipal principal) {
     UserInfoResponse response = userService.getUser(principal.getUserId());
-    return new ResponseEntity<>(ApiResponse.success("user_retrieved", response), OK);
+    return ResponseEntity.ok(ApiResponse.success(USER_RETRIEVED, response));
   }
 
   @PatchMapping("/me")
@@ -55,7 +57,7 @@ public class UserController {
       @AuthenticationPrincipal CustomUserPrincipal principal,
       @Valid @RequestBody ProfileUpdateRequest request) {
     UpdatedProfileResponse response = userService.updateProfile(principal.getUserId(), request);
-    return new ResponseEntity<>(ApiResponse.success("profile_updated", response), OK);
+    return ResponseEntity.ok(ApiResponse.success(PROFILE_UPDATED, response));
   }
 
   @PatchMapping("/me/password")
@@ -63,31 +65,25 @@ public class UserController {
       @AuthenticationPrincipal CustomUserPrincipal principal,
       @Valid @RequestBody PasswordUpdateRequest request) {
     userService.updatePassword(principal.getUserId(), request);
-    return new ResponseEntity<>(ApiResponse.success("password_updated", null), OK);
+    return ResponseEntity.ok(ApiResponse.success(PASSWORD_UPDATED, null));
   }
 
   @GetMapping("/check-email")
   public ResponseEntity<ApiResponse<AvailabilityResponse>> checkEmail(@RequestParam String email) {
     AvailabilityResponse response = userService.checkEmail(email);
-    return new ResponseEntity<>(
-        ApiResponse.success("email_checked", response),
-        OK
-    );
+    return ResponseEntity.ok(ApiResponse.success(EMAIL_CHECKED, response));
   }
 
   @GetMapping("/check-nickname")
   public ResponseEntity<ApiResponse<AvailabilityResponse>> checkNickname(
       @RequestParam String nickname) {
     AvailabilityResponse response = userService.checkNickname(nickname);
-    return new ResponseEntity<>(
-        ApiResponse.success("nickname_checked", response),
-        OK
-    );
+    return ResponseEntity.ok(ApiResponse.success(NICKNAME_CHECKED, response));
   }
 
   @DeleteMapping("/me")
   public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserPrincipal principal) {
     userService.deleteUser(principal.getUserId());
-    return new ResponseEntity<>(NO_CONTENT);
+    return ResponseEntity.status(NO_CONTENT).build();
   }
 }

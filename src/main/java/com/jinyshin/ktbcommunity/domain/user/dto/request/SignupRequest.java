@@ -1,5 +1,10 @@
 package com.jinyshin.ktbcommunity.domain.user.dto.request;
 
+import static com.jinyshin.ktbcommunity.global.constants.ValidationPatterns.NICKNAME_MESSAGE;
+import static com.jinyshin.ktbcommunity.global.constants.ValidationPatterns.NICKNAME_PATTERN;
+import static com.jinyshin.ktbcommunity.global.constants.ValidationPatterns.PASSWORD_MESSAGE;
+import static com.jinyshin.ktbcommunity.global.constants.ValidationPatterns.PASSWORD_PATTERN;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -12,12 +17,11 @@ public record SignupRequest(
 
         @NotBlank(message = "닉네임은 필수입니다.")
         @Size(min = 2, max = 10, message = "닉네임은 2자 이상 10자 이하여야 합니다.")
-        @Pattern(regexp = "^\\S+$", message = "닉네임에 띄어쓰기를 사용할 수 없습니다.")
+        @Pattern(regexp = NICKNAME_PATTERN, message = NICKNAME_MESSAGE)
         String nickname,
 
-        @NotBlank(message = "비밀번호는 8~20자의 대문자, 소문자, 숫자, 특수문자를 포함해야 합니다.")
-        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[~!@#$%^&*()_+\\-={}\\[\\]|\\\\:;\"'<>,.?/]).{8,20}$",
-                message = "비밀번호는 8~20자의 대문자, 소문자, 숫자, 특수문자를 포함해야 합니다.")
+        @NotBlank(message = PASSWORD_MESSAGE)
+        @Pattern(regexp = PASSWORD_PATTERN, message = PASSWORD_MESSAGE)
         String password,
 
         Long profileImageId

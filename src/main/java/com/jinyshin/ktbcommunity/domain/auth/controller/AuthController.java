@@ -1,6 +1,7 @@
 package com.jinyshin.ktbcommunity.domain.auth.controller;
 
-import static org.springframework.http.HttpStatus.OK;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.LOGIN_SUCCESS;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.LOGOUT_SUCCESS;
 
 import com.jinyshin.ktbcommunity.domain.auth.dto.request.LoginRequest;
 import com.jinyshin.ktbcommunity.domain.auth.service.AuthService;
@@ -30,6 +31,7 @@ public class AuthController {
         ApiResponse.success("login_success", response),
         OK
     );
+    return ResponseEntity.ok(ApiResponse.success(LOGIN_SUCCESS, response));
   }
 
   @PostMapping("/logout")
@@ -40,6 +42,7 @@ public class AuthController {
         ApiResponse.success("logout_success", null),
         OK
     );
+    return ResponseEntity.ok(ApiResponse.success(LOGOUT_SUCCESS, null));
   }
 }
 
