@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
       errors.put(fieldName, errorMessage);
     });
 
-    ApiResponse<Void> response = ApiResponse.error("invalid_request", errors);
+    ApiResponse<Void> response = ApiResponse.error(ApiErrorCode.INVALID_REQUEST.getMessage(), errors);
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiResponse<Void>> handleBadCredentialsException(
       BadCredentialsException e) {
     log.error("BadCredentialsException: {}", e.getMessage());
-    ApiResponse<Void> response = ApiResponse.error("invalid_credentials");
+    ApiResponse<Void> response = ApiResponse.error(ApiErrorCode.INVALID_CREDENTIALS.getMessage());
     return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
   }
 
@@ -57,14 +57,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(
       AuthenticationException e) {
     log.error("AuthenticationException: {}", e.getMessage());
-    ApiResponse<Void> response = ApiResponse.error("unauthorized_access");
+    ApiResponse<Void> response = ApiResponse.error(ApiErrorCode.UNAUTHORIZED.getMessage());
     return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
   }
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception e) {
     log.error("Unexpected error: ", e);
-    ApiResponse<Void> response = ApiResponse.error("internal_server_error");
+    ApiResponse<Void> response = ApiResponse.error(ApiErrorCode.INTERNAL_SERVER_ERROR.getMessage());
     return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

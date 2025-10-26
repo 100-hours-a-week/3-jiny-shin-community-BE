@@ -8,6 +8,7 @@ public enum ApiErrorCode {
 
   INVALID_REQUEST(HttpStatus.BAD_REQUEST, "invalid_request"),
   SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "same_as_current_password"),
+  NO_FIELDS_TO_UPDATE(HttpStatus.BAD_REQUEST, "no_fields_to_update"),
   UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "unauthorized_access"),
   INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "invalid_credentials"),
   INVALID_CURRENT_PASSWORD(HttpStatus.FORBIDDEN, "invalid_current_password"),

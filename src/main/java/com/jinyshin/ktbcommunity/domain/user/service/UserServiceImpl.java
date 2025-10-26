@@ -68,6 +68,11 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public UpdatedProfileResponse updateProfile(Long userId, ProfileUpdateRequest request) {
+    // 빈 요청 검증
+    if (request.nickname() == null && request.profileImageId() == null) {
+      throw BadRequestException.noFieldsToUpdate();
+    }
+
     User user = userRepository.findByUserIdAndDeletedAtIsNull(userId)
         .orElseThrow(ResourceNotFoundException::user);
 
@@ -115,12 +120,12 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public AvailabilityResponse checkEmail(String email) {
-    return new AvailabilityResponse(!userRepository.existsByEmail(email));
+    return new AvailabilityResponse(!userRepository.existsByEmailAndDeletedAtIsNull(email));
   }
 
   @Override
   public AvailabilityResponse checkNickname(String nickname) {
-    return new AvailabilityResponse(!userRepository.existsByNickname(nickname));
+    return new AvailabilityResponse(!userRepository.existsByNicknameAndDeletedAtIsNull(nickname));
   }
 
   @Override
