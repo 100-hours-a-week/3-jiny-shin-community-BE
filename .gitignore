@@ -50,3 +50,6 @@ logs/
 
 ### Mac ###
 .DS_Store
+
+### Documentation ###
+docs/
