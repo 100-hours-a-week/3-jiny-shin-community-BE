@@ -2,16 +2,16 @@ package com.jinyshin.ktbcommunity.domain.auth.service;
 
 import com.jinyshin.ktbcommunity.domain.auth.dto.request.LoginRequest;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UserInfoResponse;
-import com.jinyshin.ktbcommunity.domain.user.entity.User;
-import com.jinyshin.ktbcommunity.domain.user.repository.UserRepository;
-import com.jinyshin.ktbcommunity.global.exception.ResourceNotFoundException;
+import com.jinyshin.ktbcommunity.global.security.CustomUserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,9 +19,11 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
   private final AuthenticationManager authenticationManager;
-  private final UserRepository userRepository;
+  private final SecurityContextRepository securityContextRepository;
 
-  public UserInfoResponse login(LoginRequest request) {
+  public UserInfoResponse login(LoginRequest request,
+      HttpServletRequest httpRequest,
+      HttpServletResponse httpResponse) {
     // 인증 수행
     Authentication authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
@@ -30,25 +32,33 @@ public class AuthService {
         )
     );
 
-    // SecurityContext에 인증 정보 설정 (세션에 저장)
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+    // SecurityContext 생성 및 인증 정보 설정
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(authentication);
+    SecurityContextHolder.setContext(context);
 
-    // 사용자 정보 조회 및 반환
-    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-    User user = userRepository.findByEmail(userDetails.getUsername())
-        .orElseThrow(ResourceNotFoundException::user);
+    // SecurityContext를 세션에 저장
+    securityContextRepository.saveContext(context, httpRequest, httpResponse);
 
+    CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
     return new UserInfoResponse(
-        user.getUserId(),
-        user.getEmail(),
-        user.getNickname(),
-        user.getProfileImage() != null ? user.getProfileImage().getS3Key() : null
+        principal.getUserId(),
+        principal.getEmail(),
+        principal.getNickname(),
+        principal.getProfileImage()
     );
   }
 
-  public void logout(HttpServletRequest request) {
-    
+  public void logout(HttpServletRequest request, HttpServletResponse response) {
+    // SecurityContext 클리어
     SecurityContextHolder.clearContext();
+
+    // SecurityContextRepository에서도 제거 (login과 일관성 유지)
+    securityContextRepository.saveContext(
+        SecurityContextHolder.createEmptyContext(),
+        request,
+        response
+    );
 
     // 세션 무효화
     if (request.getSession(false) != null) {

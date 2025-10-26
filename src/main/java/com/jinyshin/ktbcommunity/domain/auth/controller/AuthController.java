@@ -8,6 +8,7 @@ import com.jinyshin.ktbcommunity.domain.auth.service.AuthService;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UserInfoResponse;
 import com.jinyshin.ktbcommunity.global.api.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,23 +26,18 @@ public class AuthController {
 
   @PostMapping("/login")
   public ResponseEntity<ApiResponse<UserInfoResponse>> login(
-      @Valid @RequestBody LoginRequest request) {
-    UserInfoResponse response = authService.login(request);
-    return new ResponseEntity<>(
-        ApiResponse.success("login_success", response),
-        OK
-    );
+      @Valid @RequestBody LoginRequest request,
+      HttpServletRequest httpRequest,
+      HttpServletResponse httpResponse) {
+    UserInfoResponse response = authService.login(request, httpRequest, httpResponse);
     return ResponseEntity.ok(ApiResponse.success(LOGIN_SUCCESS, response));
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
-    authService.logout(request);
-
-    return new ResponseEntity<>(
-        ApiResponse.success("logout_success", null),
-        OK
-    );
+  public ResponseEntity<ApiResponse<Void>> logout(
+      HttpServletRequest request,
+      HttpServletResponse response) {
+    authService.logout(request, response);
     return ResponseEntity.ok(ApiResponse.success(LOGOUT_SUCCESS, null));
   }
 }
