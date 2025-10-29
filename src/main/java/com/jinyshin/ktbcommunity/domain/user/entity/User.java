@@ -1,8 +1,13 @@
 package com.jinyshin.ktbcommunity.domain.user.entity;
 
-import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.global.common.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +18,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users", indexes = {
-        @Index(name = "idx_users_deleted_at", columnList = "deleted_at"),
-        @Index(name = "idx_users_profile_image", columnList = "profile_image_id")
+        @Index(name = "idx_users_deleted_at", columnList = "deleted_at")
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -39,10 +43,6 @@ public class User extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_image_id", foreignKey = @ForeignKey(name = "fk_users_profile_image"))
-    private Image profileImage;
-
     public User(String email, String nickname, String passwordHash) {
         this.email = email;
         this.nickname = nickname;
@@ -50,9 +50,8 @@ public class User extends BaseEntity {
     }
 
     // 비즈니스 메서드
-    public void updateProfile(String nickname, Image profileImage) {
+    public void updateProfile(String nickname) {
         this.nickname = nickname;
-        this.profileImage = profileImage;
     }
 
     public void updatePassword(String newPasswordHash) {
