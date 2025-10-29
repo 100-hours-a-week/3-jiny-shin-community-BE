@@ -6,7 +6,6 @@ public record UpdatedProfileResponse(
         Long id,
         String email,
         String nickname,
-        String profileImageUrl,
         LocalDateTime updatedAt
 ) {
 }
