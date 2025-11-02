@@ -69,6 +69,7 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     }
 
     log.debug("[SessionAuthFilter] 인증 성공: userId={}, uri={}", userId, uri);
+    request.setAttribute("userId", userId);
     filterChain.doFilter(request, response);
   }
 
