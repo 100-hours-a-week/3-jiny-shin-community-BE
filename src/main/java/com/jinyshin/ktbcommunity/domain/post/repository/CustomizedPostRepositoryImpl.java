@@ -53,6 +53,17 @@ public class CustomizedPostRepositoryImpl implements CustomizedPostRepository {
     return Optional.ofNullable(foundPost);
   }
 
+  @Override
+  public Optional<Long> findAuthorIdByPostId(Long postId) {
+    Long authorId = queryFactory
+        .select(post.author.userId)
+        .from(post)
+        .where(post.postId.eq(postId))
+        .fetchOne();
+
+    return Optional.ofNullable(authorId);
+  }
+
   private BooleanExpression getCursorCondition(Long cursor, String sort) {
     if (cursor == null) {
       return null;

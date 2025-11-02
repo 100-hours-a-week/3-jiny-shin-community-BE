@@ -11,4 +11,6 @@ public interface CustomizedPostRepository {
   Optional<Post> findByIdWithDetails(Long postId);
 
   Optional<Post> findByIdWithStats(Long postId);
+
+  Optional<Long> findAuthorIdByPostId(Long postId);
 }
