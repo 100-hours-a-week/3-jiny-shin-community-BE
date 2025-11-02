@@ -81,14 +81,14 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     // 나머지 엔드포인트는 인증 필수
     if (session == null) {
       log.warn("[SessionAuthFilter] 세션 없음 - 401 반환: {}", uri);
-      sendApiErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "인증이 필요합니다.");
+      sendApiErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "unauthorized_access");
       return;
     }
 
     Long userId = (Long) session.getAttribute("userId");
     if (userId == null) {
       log.warn("[SessionAuthFilter] userId 없음 - 401 반환: {}", uri);
-      sendApiErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "인증이 필요합니다.");
+      sendApiErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "unauthorized_access");
       return;
     }
 
