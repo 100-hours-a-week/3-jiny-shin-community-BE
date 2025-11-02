@@ -17,7 +17,6 @@ import com.jinyshin.ktbcommunity.domain.user.dto.response.UpdatedProfileResponse
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UserInfoResponse;
 import com.jinyshin.ktbcommunity.domain.user.service.UserService;
 import com.jinyshin.ktbcommunity.global.api.ApiResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -83,10 +82,8 @@ public class UserController {
 
   @DeleteMapping("/me")
   public ResponseEntity<Void> deleteUser(
-      @RequestAttribute Long userId,
-      HttpSession session) {
+      @RequestAttribute Long userId) {
     userService.deleteUser(userId);
-    session.invalidate();
     return ResponseEntity.status(NO_CONTENT).build();
   }
 }
