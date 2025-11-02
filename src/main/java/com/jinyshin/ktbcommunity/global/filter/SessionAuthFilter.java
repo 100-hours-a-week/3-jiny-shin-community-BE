@@ -52,9 +52,33 @@ public class SessionAuthFilter extends OncePerRequestFilter {
       FilterChain filterChain) throws ServletException, IOException {
 
     String uri = request.getRequestURI();
-    log.debug("[SessionAuthFilter] 인증 체크 시작: {}", uri);
+    String method = request.getMethod();
+    log.debug("[SessionAuthFilter] 인증 체크 시작: {} {}", method, uri);
+
+    // 비회원 접근 가능한 엔드포인트
+    boolean isPublicReadEndpoint = "GET".equals(method) &&
+        (uri.equals("/posts") || uri.startsWith("/posts/"));
 
     HttpSession session = request.getSession(false);
+
+    if (isPublicReadEndpoint) {
+      // 비회원 조회: 세션이 있으면 userId 저장, 없으면 그냥 통과
+      if (session != null) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId != null) {
+          log.debug("[SessionAuthFilter] 회원 조회: userId={}, uri={}", userId, uri);
+          request.setAttribute("userId", userId);
+        } else {
+          log.debug("[SessionAuthFilter] 비회원 조회: uri={}", uri);
+        }
+      } else {
+        log.debug("[SessionAuthFilter] 비회원 조회: uri={}", uri);
+      }
+      filterChain.doFilter(request, response);
+      return;
+    }
+
+    // 나머지 엔드포인트는 인증 필수
     if (session == null) {
       log.warn("[SessionAuthFilter] 세션 없음 - 401 반환: {}", uri);
       sendApiErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "인증이 필요합니다.");

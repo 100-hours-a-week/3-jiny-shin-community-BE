@@ -50,7 +50,7 @@ public class PostController {
       @RequestParam(required = false) Long cursor,
       @RequestParam(required = false, defaultValue = "desc") String sort,
       @RequestParam(required = false, defaultValue = "10") int limit,
-      @RequestAttribute Long userId) {
+      @RequestAttribute(required = false) Long userId) {
     PostListResponse response = postService.getPosts(cursor, sort, limit, userId);
     return ResponseEntity.ok(ApiResponse.success(POSTS_RETRIEVED, response));
   }
@@ -58,7 +58,7 @@ public class PostController {
   @GetMapping("/{postId}")
   public ResponseEntity<ApiResponse<PostDetailResponse>> getPostDetail(
       @PathVariable Long postId,
-      @RequestAttribute Long userId) {
+      @RequestAttribute(required = false) Long userId) {
     PostDetailResponse response = postService.getPostDetail(postId, userId);
     return ResponseEntity.ok(ApiResponse.success(POST_RETRIEVED, response));
   }
