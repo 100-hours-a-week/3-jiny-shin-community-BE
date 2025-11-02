@@ -9,4 +9,8 @@ public class ResourceNotFoundException extends ApiException {
     public static ResourceNotFoundException user() {
         return new ResourceNotFoundException(ApiErrorCode.USER_NOT_FOUND);
     }
+
+    public static ResourceNotFoundException post() {
+        return new ResourceNotFoundException(ApiErrorCode.POST_NOT_FOUND);
+    }
 }
