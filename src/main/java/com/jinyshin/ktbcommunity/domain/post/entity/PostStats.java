@@ -35,4 +35,8 @@ public class PostStats {
         this.commentCount = 0;
         this.viewCount = 0;
     }
+
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
 }
