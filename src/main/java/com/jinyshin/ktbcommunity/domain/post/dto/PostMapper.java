@@ -26,6 +26,7 @@ public final class PostMapper {
     return new UpdatedPostResponse(
         post.getPostId(),
         post.getTitle(),
+        post.getContent(),
         post.getUpdatedAt()
     );
   }

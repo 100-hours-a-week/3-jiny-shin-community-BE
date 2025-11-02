@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record UpdatedPostResponse(
     Long id,
     String title,
+    String content,
     LocalDateTime updatedAt
 ) {
 
