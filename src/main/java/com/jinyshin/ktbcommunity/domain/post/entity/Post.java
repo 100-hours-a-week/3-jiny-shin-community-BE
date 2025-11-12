@@ -1,5 +1,6 @@
 package com.jinyshin.ktbcommunity.domain.post.entity;
 
+import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.domain.user.entity.User;
 import com.jinyshin.ktbcommunity.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -10,6 +11,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "posts", indexes = {
@@ -27,10 +30,10 @@ public class Post extends BaseEntity {
     @Column(name = "post_id", nullable = false)
     private Long postId;
 
-    @Column(name = "title", nullable = false, length = 200)
+    @Column(name = "title", nullable = false, length = 26)
     private String title;
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "deleted_at")
@@ -43,6 +46,9 @@ public class Post extends BaseEntity {
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private PostStats postStats;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> postImages = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         if (postStats == null) {
@@ -54,5 +60,23 @@ public class Post extends BaseEntity {
         this.title = title;
         this.content = content;
         this.author = author;
+    }
+
+    public void update(String title, String content) {
+        if (title != null) {
+            this.title = title;
+        }
+        if (content != null) {
+            this.content = content;
+        }
+    }
+
+    public void addImage(Image image, int position) {
+        PostImage postImage = new PostImage(this, image, position);
+        this.postImages.add(postImage);
+    }
+
+    public void clearImages() {
+        this.postImages.clear();
     }
 }

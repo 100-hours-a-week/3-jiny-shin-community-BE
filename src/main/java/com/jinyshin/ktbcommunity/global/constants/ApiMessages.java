@@ -16,4 +16,21 @@ public final class ApiMessages {
   public static final String PASSWORD_UPDATED = "password_updated";
   public static final String EMAIL_CHECKED = "email_checked";
   public static final String NICKNAME_CHECKED = "nickname_checked";
+
+  // Post
+  public static final String POSTS_RETRIEVED = "posts_retrieved";
+  public static final String POST_RETRIEVED = "post_retrieved";
+  public static final String POST_CREATED = "post_created";
+  public static final String POST_UPDATED = "post_updated";
+  public static final String POST_DELETED = "post_deleted";
+
+  // Comment
+  public static final String COMMENTS_RETRIEVED = "comments_retrieved";
+  public static final String COMMENT_CREATED = "comment_created";
+  public static final String COMMENT_UPDATED = "comment_updated";
+  public static final String COMMENT_DELETED = "comment_deleted";
+
+  // Like
+  public static final String LIKE_ADDED = "like_added";
+  public static final String LIKE_REMOVED = "like_removed";
 }

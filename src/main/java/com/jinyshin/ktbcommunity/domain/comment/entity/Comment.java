@@ -1,5 +1,7 @@
 package com.jinyshin.ktbcommunity.domain.comment.entity;
 
+import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.DELETED_COMMENT_MESSAGE;
+
 import com.jinyshin.ktbcommunity.domain.post.entity.Post;
 import com.jinyshin.ktbcommunity.domain.user.entity.User;
 import com.jinyshin.ktbcommunity.global.common.BaseEntity;
@@ -45,5 +47,17 @@ public class Comment extends BaseEntity {
         this.content = content;
         this.author = author;
         this.post = post;
+    }
+
+    public void update(String content) {
+        this.content = content;
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
+
+    public String getDisplayContent() {
+        return isDeleted() ? DELETED_COMMENT_MESSAGE : this.content;
     }
 }
