@@ -19,6 +19,7 @@ import com.jinyshin.ktbcommunity.domain.user.repository.UserRepository;
 import com.jinyshin.ktbcommunity.global.exception.ForbiddenException;
 import com.jinyshin.ktbcommunity.global.exception.ResourceNotFoundException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,7 @@ public class CommentServiceImpl implements CommentService {
   @Transactional(readOnly = true)
   public CommentListResponse getComments(Long postId, Long cursor, String sort, int limit,
       Long currentUserId) {
+
     if (limit <= 0 || limit > MAX_PAGE_LIMIT) {
       limit = DEFAULT_PAGE_LIMIT;
     }
@@ -78,7 +80,10 @@ public class CommentServiceImpl implements CommentService {
 
     List<CommentInfoResponse> commentInfos = comments.stream()
         .map(comment -> {
-          boolean isAuthor = comment.getAuthor().getUserId().equals(currentUserId);
+          boolean isAuthor = Objects.equals(
+              comment.getAuthor().getUserId(),
+              currentUserId
+          );
           return CommentMapper.toCommentInfo(comment, isAuthor);
         })
         .collect(Collectors.toList());
