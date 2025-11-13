@@ -6,8 +6,6 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -41,30 +39,14 @@ public class GlobalExceptionHandler {
       errors.put(fieldName, errorMessage);
     });
 
-    ApiResponse<Void> response = ApiResponse.error(ApiErrorCode.INVALID_REQUEST.getMessage(), errors);
+    ApiResponse<Void> response = ApiResponse.error("invalid_request", errors);
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-  }
-
-  @ExceptionHandler(BadCredentialsException.class)
-  public ResponseEntity<ApiResponse<Void>> handleBadCredentialsException(
-      BadCredentialsException e) {
-    log.error("BadCredentialsException: {}", e.getMessage());
-    ApiResponse<Void> response = ApiResponse.error(ApiErrorCode.INVALID_CREDENTIALS.getMessage());
-    return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-  }
-
-  @ExceptionHandler(AuthenticationException.class)
-  public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(
-      AuthenticationException e) {
-    log.error("AuthenticationException: {}", e.getMessage());
-    ApiResponse<Void> response = ApiResponse.error(ApiErrorCode.UNAUTHORIZED.getMessage());
-    return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
   }
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception e) {
     log.error("Unexpected error: ", e);
-    ApiResponse<Void> response = ApiResponse.error(ApiErrorCode.INTERNAL_SERVER_ERROR.getMessage());
+    ApiResponse<Void> response = ApiResponse.error("internal_server_error");
     return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

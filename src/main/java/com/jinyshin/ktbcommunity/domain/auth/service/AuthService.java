@@ -1,68 +1,42 @@
 package com.jinyshin.ktbcommunity.domain.auth.service;
 
 import com.jinyshin.ktbcommunity.domain.auth.dto.request.LoginRequest;
-import com.jinyshin.ktbcommunity.domain.user.dto.response.UserInfoResponse;
-import com.jinyshin.ktbcommunity.global.security.CustomUserPrincipal;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.jinyshin.ktbcommunity.domain.user.entity.User;
+import com.jinyshin.ktbcommunity.domain.user.repository.UserRepository;
+import com.jinyshin.ktbcommunity.global.exception.ResourceNotFoundException;
+import com.jinyshin.ktbcommunity.global.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.SecurityContextRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Slf4j
 public class AuthService {
 
-  private final AuthenticationManager authenticationManager;
-  private final SecurityContextRepository securityContextRepository;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
-  public UserInfoResponse login(LoginRequest request,
-      HttpServletRequest httpRequest,
-      HttpServletResponse httpResponse) {
-    // 인증 수행
-    Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(
-            request.email(),
-            request.password()
-        )
-    );
+  /**
+   * 로그인 처리: 이메일과 비밀번호 검증 후 세션에 userId 저장
+   */
+  public Long login(LoginRequest request) {
+    // 사용자 조회
+    User user = userRepository.findByEmailAndDeletedAtIsNull(request.email())
+        .orElseThrow(ResourceNotFoundException::user);
 
-    // SecurityContext 생성 및 인증 정보 설정
-    SecurityContext context = SecurityContextHolder.createEmptyContext();
-    context.setAuthentication(authentication);
-    SecurityContextHolder.setContext(context);
+    // 비밀번호 검증
+    if (!checkPassword(user, request.password())) {
+      throw UnauthorizedException.invalidCredentials();
+    }
 
-    // SecurityContext를 세션에 저장
-    securityContextRepository.saveContext(context, httpRequest, httpResponse);
-
-    CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
-    return new UserInfoResponse(
-        principal.getUserId(),
-        principal.getEmail(),
-        principal.getNickname(),
-        principal.getProfileImage()
-    );
+    return user.getUserId();
   }
 
-  public void logout(HttpServletRequest request, HttpServletResponse response) {
-    // SecurityContext 클리어
-    SecurityContextHolder.clearContext();
-
-    // SecurityContextRepository에서도 제거 (login과 일관성 유지)
-    securityContextRepository.saveContext(
-        SecurityContextHolder.createEmptyContext(),
-        request,
-        response
-    );
-
-    // 세션 무효화
-    if (request.getSession(false) != null) {
-      request.getSession().invalidate();
-    }
+  private boolean checkPassword(User user, String rawPassword) {
+    return passwordEncoder.matches(rawPassword, user.getPasswordHash());
   }
 }

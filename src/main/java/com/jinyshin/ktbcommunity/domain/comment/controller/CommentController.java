@@ -14,16 +14,15 @@ import com.jinyshin.ktbcommunity.domain.comment.dto.response.CreatedCommentRespo
 import com.jinyshin.ktbcommunity.domain.comment.dto.response.UpdatedCommentResponse;
 import com.jinyshin.ktbcommunity.domain.comment.service.CommentService;
 import com.jinyshin.ktbcommunity.global.api.ApiResponse;
-import com.jinyshin.ktbcommunity.global.security.CustomUserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,10 +36,9 @@ public class CommentController {
   @PostMapping("/posts/{postId}/comments")
   public ResponseEntity<ApiResponse<CreatedCommentResponse>> createComment(
       @PathVariable Long postId,
-      @AuthenticationPrincipal CustomUserPrincipal principal,
+      @RequestAttribute Long userId,
       @Valid @RequestBody CreateCommentRequest request) {
-    CreatedCommentResponse response = commentService.createComment(postId, principal.getUserId(),
-        request);
+    CreatedCommentResponse response = commentService.createComment(postId, userId, request);
     return ResponseEntity.status(CREATED).body(ApiResponse.success(COMMENT_CREATED, response));
   }
 
@@ -50,28 +48,25 @@ public class CommentController {
       @RequestParam(required = false) Long cursor,
       @RequestParam(required = false, defaultValue = "desc") String sort,
       @RequestParam(required = false, defaultValue = "10") int limit,
-      @AuthenticationPrincipal(errorOnInvalidType = false) CustomUserPrincipal principal) {
-    Long currentUserId = principal != null ? principal.getUserId() : null;
-    CommentListResponse response = commentService.getComments(postId, cursor, sort, limit,
-        currentUserId);
+      @RequestAttribute(required = false) Long userId) {
+    CommentListResponse response = commentService.getComments(postId, cursor, sort, limit, userId);
     return ResponseEntity.ok(ApiResponse.success(COMMENTS_RETRIEVED, response));
   }
 
   @PatchMapping("/comments/{commentId}")
   public ResponseEntity<ApiResponse<UpdatedCommentResponse>> updateComment(
       @PathVariable Long commentId,
-      @AuthenticationPrincipal CustomUserPrincipal principal,
+      @RequestAttribute Long userId,
       @Valid @RequestBody UpdateCommentRequest request) {
-    UpdatedCommentResponse response = commentService.updateComment(commentId,
-        principal.getUserId(), request);
+    UpdatedCommentResponse response = commentService.updateComment(commentId, userId, request);
     return ResponseEntity.ok(ApiResponse.success(COMMENT_UPDATED, response));
   }
 
   @DeleteMapping("/comments/{commentId}")
   public ResponseEntity<ApiResponse<Void>> deleteComment(
       @PathVariable Long commentId,
-      @AuthenticationPrincipal CustomUserPrincipal principal) {
-    commentService.deleteComment(commentId, principal.getUserId());
+      @RequestAttribute Long userId) {
+    commentService.deleteComment(commentId, userId);
     return ResponseEntity.status(NO_CONTENT).body(ApiResponse.success(COMMENT_DELETED, null));
   }
 }
