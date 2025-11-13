@@ -17,15 +17,15 @@ import com.jinyshin.ktbcommunity.domain.user.dto.response.UpdatedProfileResponse
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UserInfoResponse;
 import com.jinyshin.ktbcommunity.domain.user.service.UserService;
 import com.jinyshin.ktbcommunity.global.api.ApiResponse;
-import com.jinyshin.ktbcommunity.global.security.CustomUserPrincipal;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,24 +47,24 @@ public class UserController {
 
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<UserInfoResponse>> getMyInfo(
-      @AuthenticationPrincipal CustomUserPrincipal principal) {
-    UserInfoResponse response = userService.getUser(principal.getUserId());
+      @RequestAttribute Long userId) {
+    UserInfoResponse response = userService.getUser(userId);
     return ResponseEntity.ok(ApiResponse.success(USER_RETRIEVED, response));
   }
 
   @PatchMapping("/me")
   public ResponseEntity<ApiResponse<UpdatedProfileResponse>> updateProfile(
-      @AuthenticationPrincipal CustomUserPrincipal principal,
+      @RequestAttribute Long userId,
       @Valid @RequestBody ProfileUpdateRequest request) {
-    UpdatedProfileResponse response = userService.updateProfile(principal.getUserId(), request);
+    UpdatedProfileResponse response = userService.updateProfile(userId, request);
     return ResponseEntity.ok(ApiResponse.success(PROFILE_UPDATED, response));
   }
 
   @PatchMapping("/me/password")
   public ResponseEntity<ApiResponse<Void>> updatePassword(
-      @AuthenticationPrincipal CustomUserPrincipal principal,
+      @RequestAttribute Long userId,
       @Valid @RequestBody PasswordUpdateRequest request) {
-    userService.updatePassword(principal.getUserId(), request);
+    userService.updatePassword(userId, request);
     return ResponseEntity.ok(ApiResponse.success(PASSWORD_UPDATED, null));
   }
 
@@ -82,8 +82,9 @@ public class UserController {
   }
 
   @DeleteMapping("/me")
-  public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserPrincipal principal) {
-    userService.deleteUser(principal.getUserId());
+  public ResponseEntity<Void> deleteUser(@RequestAttribute Long userId, HttpSession session) {
+    userService.deleteUser(userId);
+    session.invalidate();
     return ResponseEntity.status(NO_CONTENT).build();
   }
 }
