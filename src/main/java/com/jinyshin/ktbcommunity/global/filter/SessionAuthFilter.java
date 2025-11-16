@@ -23,7 +23,8 @@ public class SessionAuthFilter extends OncePerRequestFilter {
   private static final String[] EXCLUDED_PATHS = {
       "/auth/login",
       "/users/check-email",
-      "/users/check-nickname"
+      "/users/check-nickname",
+      "/actuator/health"
   };
 
   private final ObjectMapper objectMapper;
@@ -34,10 +35,7 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     String method = request.getMethod();
 
     boolean shouldExclude;
-    // Actuator health check는 항상 제외 (ALB Health Check 지원)
-    if (uri.contains("/actuator/health")) {
-      shouldExclude = true;
-    } else if ("/users".equals(uri) && "POST".equals(method)) {
+    if ("/users".equals(uri) && "POST".equals(method)) {
       shouldExclude = true;
     } else {
       shouldExclude = Arrays.asList(EXCLUDED_PATHS).contains(uri);
