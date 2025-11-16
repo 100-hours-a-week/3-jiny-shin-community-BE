@@ -23,7 +23,8 @@ public class SessionAuthFilter extends OncePerRequestFilter {
   private static final String[] EXCLUDED_PATHS = {
       "/auth/login",
       "/users/check-email",
-      "/users/check-nickname"
+      "/users/check-nickname",
+      "/actuator/health"
   };
 
   private final ObjectMapper objectMapper;
