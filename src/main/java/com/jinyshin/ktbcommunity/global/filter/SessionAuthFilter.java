@@ -20,7 +20,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class SessionAuthFilter extends OncePerRequestFilter {
 
-  private static final String[] EXCLUDED_PATHS = {
+  // 인증 없이 접근 가능한 경로 (메서드 무관)
+  private static final String[] PUBLIC_PATHS = {
       "/auth/login",
       "/users/check-email",
       "/users/check-nickname",
@@ -34,16 +35,18 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     String uri = request.getRequestURI();
     String method = request.getMethod();
 
-    boolean shouldExclude;
-    if ("/users".equals(uri) && "POST".equals(method)) {
-      shouldExclude = true;
-    } else {
-      shouldExclude = Arrays.asList(EXCLUDED_PATHS).contains(uri);
+    // CORS preflight 요청 허용
+    if ("OPTIONS".equals(method)) {
+      return true;
     }
 
-    log.debug("[SessionAuthFilter] {} {} - Filter 제외 여부: {}",
-        method, uri, shouldExclude);
-    return shouldExclude;
+    // 회원가입 API 요청(POST) 허용
+    if ("/users".equals(uri) && "POST".equals(method)) {
+      return true;
+    }
+
+    // 그 외 공개 경로
+    return Arrays.asList(PUBLIC_PATHS).contains(uri);
   }
 
   @Override
@@ -54,7 +57,6 @@ public class SessionAuthFilter extends OncePerRequestFilter {
 
     String uri = request.getRequestURI();
     String method = request.getMethod();
-    log.debug("[SessionAuthFilter] 인증 체크 시작: {} {}", method, uri);
 
     // 비회원 접근 가능한 엔드포인트
     boolean isPublicReadEndpoint = "GET".equals(method) &&
@@ -67,13 +69,8 @@ public class SessionAuthFilter extends OncePerRequestFilter {
       if (session != null) {
         Long userId = (Long) session.getAttribute("userId");
         if (userId != null) {
-          log.debug("[SessionAuthFilter] 회원 조회: userId={}, uri={}", userId, uri);
           request.setAttribute("userId", userId);
-        } else {
-          log.debug("[SessionAuthFilter] 비회원 조회: uri={}", uri);
         }
-      } else {
-        log.debug("[SessionAuthFilter] 비회원 조회: uri={}", uri);
       }
       filterChain.doFilter(request, response);
       return;
@@ -110,5 +107,4 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     String json = objectMapper.writeValueAsString(apiResponse);
     response.getWriter().write(json);
   }
-
 }
