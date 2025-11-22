@@ -14,7 +14,7 @@ public final class UserMapper {
         user.getUserId(),
         user.getEmail(),
         user.getNickname(),
-        user.getProfileImage() != null ? user.getProfileImage().getS3Key() : null
+        user.getProfileImage() != null ? user.getProfileImage().getFilename() : null
     );
   }
 
@@ -23,7 +23,7 @@ public final class UserMapper {
         user.getUserId(),
         user.getEmail(),
         user.getNickname(),
-        user.getProfileImage() != null ? user.getProfileImage().getS3Key() : null,
+        user.getProfileImage() != null ? user.getProfileImage().getFilename() : null,
         user.getUpdatedAt()
     );
   }

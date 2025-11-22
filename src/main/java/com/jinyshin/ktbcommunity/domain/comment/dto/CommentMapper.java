@@ -45,7 +45,7 @@ public final class CommentMapper {
         comment.getAuthor().getUserId(),
         comment.getAuthor().getNickname(),
         comment.getAuthor().getProfileImage() != null
-            ? comment.getAuthor().getProfileImage().getS3Key()
+            ? comment.getAuthor().getProfileImage().getFilename()
             : null
     );
   }
