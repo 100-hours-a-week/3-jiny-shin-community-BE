@@ -1,5 +1,10 @@
 package com.jinyshin.ktbcommunity.domain.image.controller;
 
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGES_RETRIEVED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_DELETED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_RETRIEVED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_UPLOADED;
+
 import com.jinyshin.ktbcommunity.domain.image.dto.ImageResponse;
 import com.jinyshin.ktbcommunity.domain.image.dto.ImageUploadResponse;
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
@@ -37,7 +42,7 @@ public class ImageController {
     ImageUploadResponse response = ImageUploadResponse.from(savedImage);
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponse.success("이미지 업로드 성공", response));
+        .body(ApiResponse.success(IMAGE_UPLOADED, response));
   }
   
   @GetMapping("/{imageId}")
@@ -45,7 +50,7 @@ public class ImageController {
     Image image = imageService.getImage(imageId);
     ImageResponse response = ImageResponse.from(image);
 
-    return ResponseEntity.ok(ApiResponse.success("이미지 조회 성공", response));
+    return ResponseEntity.ok(ApiResponse.success(IMAGE_RETRIEVED, response));
   }
 
   @GetMapping
@@ -57,13 +62,13 @@ public class ImageController {
         .map(ImageResponse::from)
         .toList();
 
-    return ResponseEntity.ok(ApiResponse.success("이미지 목록 조회 성공", responses));
+    return ResponseEntity.ok(ApiResponse.success(IMAGES_RETRIEVED, responses));
   }
 
   @DeleteMapping("/{imageId}")
   public ResponseEntity<ApiResponse<Void>> deleteImage(@PathVariable Long imageId) {
     imageService.deleteImage(imageId);
 
-    return ResponseEntity.ok(ApiResponse.success("이미지 삭제 성공", null));
+    return ResponseEntity.ok(ApiResponse.success(IMAGE_DELETED, null));
   }
 }
