@@ -1,6 +1,16 @@
 package com.jinyshin.ktbcommunity.domain.image.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +19,9 @@ import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "images", indexes = {
-        @Index(name = "idx_images_deleted_at", columnList = "deleted_at")
+    @Index(name = "idx_images_deleted_at", columnList = "deleted_at")
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,22 +30,27 @@ import java.time.LocalDateTime;
 @SQLRestriction("deleted_at IS NULL")
 public class Image {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "image_id", nullable = false)
-    private Long imageId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "image_id", nullable = false)
+  private Long imageId;
 
-    @Column(name = "s3_key", nullable = false, length = 500)
-    private String s3Key;
+  @Column(name = "filename", nullable = false, length = 500)
+  private String filename;
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "image_type", nullable = false, length = 20)
+  private ImageType imageType;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+  @CreatedDate
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
-    public Image(String s3Key) {
-        this.s3Key = s3Key;
-    }
+  @Column(name = "deleted_at")
+  private LocalDateTime deletedAt;
+
+  public Image(String filename, ImageType imageType) {
+    this.filename = filename;
+    this.imageType = imageType;
+  }
 }
