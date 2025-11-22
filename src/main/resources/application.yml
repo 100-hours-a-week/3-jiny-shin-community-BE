@@ -2,6 +2,11 @@ spring:
   profiles:
     active: local
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -30,3 +35,7 @@ management:
     web:
       exposure:
         include: health
+
+file:
+  upload:
+    path: ${FILE_UPLOAD_PATH:./uploads}
