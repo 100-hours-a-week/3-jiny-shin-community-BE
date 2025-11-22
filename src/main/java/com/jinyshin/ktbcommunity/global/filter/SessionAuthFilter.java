@@ -22,9 +22,9 @@ public class SessionAuthFilter extends OncePerRequestFilter {
 
   // 인증 없이 접근 가능한 경로 (메서드 무관)
   private static final String[] PUBLIC_PATHS = {
-      "/auth/login",
-      "/users/check-email",
-      "/users/check-nickname",
+      "/api/auth/login",
+      "/api/users/check-email",
+      "/api/users/check-nickname",
       "/actuator/health"
   };
 
@@ -41,7 +41,7 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     }
 
     // 회원가입 API 요청(POST) 허용
-    if ("/users".equals(uri) && "POST".equals(method)) {
+    if ("/api/users".equals(uri) && "POST".equals(method)) {
       return true;
     }
 
@@ -60,7 +60,7 @@ public class SessionAuthFilter extends OncePerRequestFilter {
 
     // 비회원 접근 가능한 엔드포인트
     boolean isPublicReadEndpoint = "GET".equals(method) &&
-        (uri.equals("/posts") || uri.startsWith("/posts/"));
+        (uri.equals("/api/posts") || uri.startsWith("/api/posts/"));
 
     HttpSession session = request.getSession(false);
 
