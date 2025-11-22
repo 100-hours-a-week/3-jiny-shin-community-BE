@@ -46,13 +46,33 @@ public class PostServiceImpl implements PostService {
     Post post = new Post(request.title(), request.content(), user);
 
     if (request.imageIds() != null && !request.imageIds().isEmpty()) {
+      // primaryImageId 검증
+      if (request.primaryImageId() != null && !request.imageIds()
+          .contains(request.primaryImageId())) {
+        throw BadRequestException.primaryImageNotInList();
+      }
+
       List<Image> images = imageRepository.findByImageIdIn(request.imageIds());
       if (images.size() != request.imageIds().size()) {
         throw ResourceNotFoundException.image();
       }
 
       for (int i = 0; i < images.size(); i++) {
-        post.addImage(images.get(i), i);
+        post.addImage(images.get(i), i + 1);
+      }
+
+      if (request.primaryImageId() != null) {
+        // 사용자가 선택한 대표 이미지 설정
+        post.getPostImages().stream()
+            .filter(postImage -> postImage.getImage().getImageId().equals(request.primaryImageId()))
+            .findFirst()
+            .ifPresent(postImage -> postImage.setPrimary(true));
+      } else {
+        // 대표 이미지가 없다면 첫 번째 이미지를 대표로 설정
+        post.getPostImages().stream()
+            .filter(postImage -> postImage.getPosition() == 1)
+            .findFirst()
+            .ifPresent(postImage -> postImage.setPrimary(true));
       }
     }
 

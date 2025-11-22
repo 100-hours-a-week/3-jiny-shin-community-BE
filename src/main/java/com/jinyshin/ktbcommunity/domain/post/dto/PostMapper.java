@@ -53,7 +53,7 @@ public final class PostMapper {
 
   public static PostDetailResponse toPostDetail(Post post, boolean isLiked, boolean isAuthor) {
     List<String> imageUrls = post.getPostImages().stream()
-        .map(postImage -> postImage.getImage().getS3Key())
+        .map(postImage -> postImage.getImage().getFilename())
         .collect(Collectors.toList());
 
     return new PostDetailResponse(
@@ -77,7 +77,7 @@ public final class PostMapper {
         post.getAuthor().getUserId(),
         post.getAuthor().getNickname(),
         post.getAuthor().getProfileImage() != null
-            ? post.getAuthor().getProfileImage().getS3Key()
+            ? post.getAuthor().getProfileImage().getFilename()
             : null
     );
   }
