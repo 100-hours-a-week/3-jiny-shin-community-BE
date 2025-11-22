@@ -13,4 +13,8 @@ public class BadRequestException extends ApiException {
   public static BadRequestException noFieldsToUpdate() {
     return new BadRequestException(ApiErrorCode.NO_FIELDS_TO_UPDATE);
   }
+
+  public static BadRequestException primaryImageNotInList() {
+    return new BadRequestException(ApiErrorCode.PRIMARY_IMAGE_NOT_IN_LIST);
+  }
 }

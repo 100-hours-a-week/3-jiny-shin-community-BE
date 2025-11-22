@@ -25,8 +25,17 @@ public enum ApiErrorCode {
   EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "email_already_exists"),
   NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "nickname_already_exists"),
   ALREADY_LIKED(HttpStatus.CONFLICT, "already_liked"),
-  INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "internal_server_error");
-  
+  INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "internal_server_error"),
+
+  // image
+  IMAGE_FILE_EMPTY(HttpStatus.BAD_REQUEST, "image_file_empty"),
+  PRIMARY_IMAGE_NOT_IN_LIST(HttpStatus.BAD_REQUEST, "primary_image_not_in_list"),
+  IMAGE_FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "image_file_too_large"),
+  IMAGE_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "image_invalid_format"),
+  IMAGE_PROCESSING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "image_processing_failed"),
+  IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "image_save_failed"),
+  IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "image_delete_failed");
+
   private final HttpStatus status;
   private final String message;
 
