@@ -5,12 +5,10 @@ import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.POS
 import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.POST_TITLE_MAX;
 import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.POST_TITLE_MIN;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record CreatePostRequest(
     @NotBlank(message = "제목은 필수입니다.")
     @Size(min = POST_TITLE_MIN, max = POST_TITLE_MAX, message = "제목은 2자 이상 26자 이하여야 합니다.")
