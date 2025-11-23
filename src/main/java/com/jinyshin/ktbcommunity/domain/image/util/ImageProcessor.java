@@ -1,4 +1,4 @@
-package com.jinyshin.ktbcommunity.domain.image.processor;
+package com.jinyshin.ktbcommunity.domain.image.util;
 
 import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
 import com.jinyshin.ktbcommunity.global.exception.ApiErrorCode;

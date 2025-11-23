@@ -1,55 +1,51 @@
 package com.jinyshin.ktbcommunity.domain.image.dto;
 
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
+import com.jinyshin.ktbcommunity.domain.image.util.ImageUrlGenerator;
+import com.jinyshin.ktbcommunity.domain.image.util.ImageUrls;
+import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-public final class ImageMapper {
+@Component
+@RequiredArgsConstructor
+public class ImageMapper {
 
-  private ImageMapper() {
+  private final ImageUrlGenerator urlGenerator;
+
+  public ImageResponse toImageResponse(Image image) {
+    return toImageResponse(image, image.getCreatedAt());
   }
 
-  /**
-   * Image Entity → ImageResponse DTO 변환
-   *
-   * @param image       Image 엔티티
-   * @param originalUrl 원본 이미지 URL
-   * @param jpgUrl      JPG 포맷 URL
-   * @param webpUrl     WebP 포맷 URL
-   */
-  public static ImageResponse toImageResponse(
+  public ImageResponse toImageResponse(
       Image image,
-      String originalUrl,
-      String jpgUrl,
-      String webpUrl
+      LocalDateTime createdAt
   ) {
+    return toImageResponse(image, false, createdAt);
+  }
+
+  public ImageResponse toImageResponse(
+      Image image,
+      boolean useThumbnail
+  ) {
+    return toImageResponse(image, useThumbnail, image.getCreatedAt());
+  }
+
+  public ImageResponse toImageResponse(
+      Image image,
+      boolean useThumbnail,
+      LocalDateTime createdAt
+  ) {
+    ImageUrls urls = urlGenerator.generateUrls(image, useThumbnail);
+
     return new ImageResponse(
         image.getImageId(),
         image.getImageType(),
         image.getStoredFilename(),
         image.getOriginalExtension(),
-        originalUrl,
-        jpgUrl,
-        webpUrl,
-        image.getCreatedAt()
-    );
-  }
-
-  /**
-   * Image Entity → ImageUploadResponse DTO 변환
-   */
-  public static ImageUploadResponse toImageUploadResponse(
-      Image image,
-      String originalUrl,
-      String jpgUrl,
-      String webpUrl
-  ) {
-    return new ImageUploadResponse(
-        image.getImageId(),
-        image.getImageType(),
-        image.getStoredFilename(),
-        image.getOriginalExtension(),
-        originalUrl,
-        jpgUrl,
-        webpUrl
+        urls.jpgUrl(),
+        urls.webpUrl(),
+        createdAt
     );
   }
 }
