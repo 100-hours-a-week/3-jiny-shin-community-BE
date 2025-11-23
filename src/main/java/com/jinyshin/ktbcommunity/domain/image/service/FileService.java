@@ -14,14 +14,6 @@ public interface FileService {
   String saveFile(File file, String filename);
 
   /**
-   * 파일을 로드
-   *
-   * @param filename 로드할 파일명
-   * @return File 객체
-   */
-  File loadFile(String filename);
-
-  /**
    * 파일을 삭제
    *
    * @param filename 삭제할 파일명
@@ -35,5 +27,13 @@ public interface FileService {
    * @return 존재 여부
    */
   boolean existsFile(String filename);
+
+  /**
+   * 파일의 Public URL 반환
+   *
+   * @param filename 파일명
+   * @return Public URL
+   */
+  String getPublicUrl(String filename);
 
 }

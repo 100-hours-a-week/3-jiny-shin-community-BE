@@ -1,20 +1,14 @@
 package com.jinyshin.ktbcommunity.domain.image.dto;
 
-import com.jinyshin.ktbcommunity.domain.image.entity.Image;
+import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
+import java.time.LocalDateTime;
 
 public record ImageResponse(
     Long imageId,
-    String imageType,
+    ImageType imageType,
     String filename,
-    String createdAt
+    String imageUrl,
+    LocalDateTime createdAt
 ) {
 
-  public static ImageResponse from(Image image) {
-    return new ImageResponse(
-        image.getImageId(),
-        image.getImageType().name(),
-        image.getFilename(),
-        image.getCreatedAt().toString()
-    );
-  }
 }

@@ -1,9 +1,10 @@
 package com.jinyshin.ktbcommunity.domain.image.processor;
 
-import com.jinyshin.ktbcommunity.domain.image.dto.ProcessedFiles;
 import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
 import com.jinyshin.ktbcommunity.global.exception.ApiErrorCode;
 import com.jinyshin.ktbcommunity.global.exception.ApiException;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -25,23 +26,58 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageProcessor {
 
   private static final int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-  private static final Set<String> ALLOWED_FORMATS = Set.of("jpg", "jpeg", "png", "webp");
+  private static final Set<String> ALLOWED_FORMATS = Set.of("jpg", "jpeg", "png");
 
-  public ProcessedFiles processImage(MultipartFile file, ImageType imageType) {
+  // 이미지를 처리하여 JPG 파일로 반환, PNG의 경우 RGB 변환 후 JPG로 압축
+  public File processImage(MultipartFile file, ImageType imageType) {
     validateFile(file);
 
     try {
       BufferedImage image = ImageIO.read(file.getInputStream());
       if (image == null) {
-        throw new ApiException(ApiErrorCode.IMAGE_PROCESSING_FAILED);
+        throw new ApiException(ApiErrorCode.IMAGE_INVALID_FORMAT);
       }
 
-      File jpgFile = compressToJPG(image, imageType);
+      // RGB 변환 (CMYK, Grayscale, Alpha 채널 처리)
+      BufferedImage rgbImage = convertToRGB(image);
 
-      return new ProcessedFiles(jpgFile);
+      // JPG 압축
+      return compressToJPG(rgbImage, imageType);
     } catch (IOException e) {
       log.error("이미지 처리 실패: {}", file.getOriginalFilename(), e);
       throw new ApiException(ApiErrorCode.IMAGE_PROCESSING_FAILED);
+    }
+  }
+
+  // BufferedImage를 RGB 색상 공간으로 변환
+  private BufferedImage convertToRGB(BufferedImage source) {
+    // 이미 RGB 이미지라면 그대로 반환
+    if (source.getType() == BufferedImage.TYPE_INT_RGB) {
+      return source;
+    }
+
+    log.info("이미지 RGB 변환 시작: type={}", source.getType());
+
+    // 새로운 RGB 이미지 생성
+    BufferedImage rgbImage = new BufferedImage(
+        source.getWidth(),
+        source.getHeight(),
+        BufferedImage.TYPE_INT_RGB);
+
+    // Graphics2D를 사용하여 이미지 복사
+    Graphics2D g = rgbImage.createGraphics();
+    try {
+      // 흰색 배경 설정 (투명도 처리)
+      g.setColor(Color.WHITE);
+      g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
+
+      // 원본 이미지를 RGB 이미지 위에 그리기
+      g.drawImage(source, 0, 0, null);
+
+      log.info("RGB 변환 완료");
+      return rgbImage;
+    } finally {
+      g.dispose();
     }
   }
 
@@ -78,10 +114,13 @@ public class ImageProcessor {
 
   private String generateFileName(ImageType imageType, String extension) {
     String uuid = UUID.randomUUID().toString();
-    String postfix = imageType.getFileNamePostfix();
-    return String.format("%s_%s.%s", uuid, postfix, extension);
+    String suffix = imageType.getFileNameSuffix();
+    return String.format("%s_%s.%s", uuid, suffix, extension);
   }
 
+  /**
+   * BufferedImage를 JPG로 압축
+   */
   private File compressToJPG(BufferedImage image, ImageType imageType)
       throws IOException {
     Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
@@ -101,14 +140,14 @@ public class ImageProcessor {
       params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
       params.setCompressionQuality(quality);
 
+      // RGB 변환된 이미지를 JPG로 압축 (Bogus input colorspace 에러 방지)
       writer.write(null, new IIOImage(image, null, null), params);
+
+      log.info("JPG 압축 완료: quality={}, size={}KB", quality, outputFile.length() / 1024);
     } finally {
       writer.dispose();
     }
 
     return outputFile;
   }
-
-  // TODO: WebP 변환 기능 추가
-  // private File convertToWebP(BufferedImage image, ImageType imageType)
 }
