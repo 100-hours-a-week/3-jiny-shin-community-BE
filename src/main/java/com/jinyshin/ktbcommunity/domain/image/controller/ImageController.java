@@ -5,10 +5,12 @@ import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_DELET
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_RETRIEVED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_UPLOADED;
 
+import com.jinyshin.ktbcommunity.domain.image.dto.ImageMapper;
 import com.jinyshin.ktbcommunity.domain.image.dto.ImageResponse;
 import com.jinyshin.ktbcommunity.domain.image.dto.ImageUploadResponse;
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
+import com.jinyshin.ktbcommunity.domain.image.service.FileService;
 import com.jinyshin.ktbcommunity.domain.image.service.ImageService;
 import com.jinyshin.ktbcommunity.global.api.ApiResponse;
 import java.util.List;
@@ -32,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageController {
 
   private final ImageService imageService;
+  private final FileService fileService;
   
   @PostMapping
   public ResponseEntity<ApiResponse<ImageUploadResponse>> uploadImage(
@@ -39,16 +42,18 @@ public class ImageController {
       @RequestParam("imageType") ImageType imageType) {
 
     Image savedImage = imageService.uploadImage(file, imageType);
-    ImageUploadResponse response = ImageUploadResponse.from(savedImage);
+    String imageUrl = fileService.getPublicUrl(savedImage.getFilename());
+    ImageUploadResponse response = ImageMapper.toImageUploadResponse(savedImage, imageUrl);
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(ApiResponse.success(IMAGE_UPLOADED, response));
   }
-  
+
   @GetMapping("/{imageId}")
   public ResponseEntity<ApiResponse<ImageResponse>> getImage(@PathVariable Long imageId) {
     Image image = imageService.getImage(imageId);
-    ImageResponse response = ImageResponse.from(image);
+    String imageUrl = fileService.getPublicUrl(image.getFilename());
+    ImageResponse response = ImageMapper.toImageResponse(image, imageUrl);
 
     return ResponseEntity.ok(ApiResponse.success(IMAGE_RETRIEVED, response));
   }
@@ -58,9 +63,10 @@ public class ImageController {
       @RequestParam("imageIds") List<Long> imageIds) {
 
     List<Image> images = imageService.getImages(imageIds);
-    List<ImageResponse> responses = images.stream()
-        .map(ImageResponse::from)
-        .toList();
+    List<ImageResponse> responses = ImageMapper.toImageResponses(
+        images,
+        image -> fileService.getPublicUrl(image.getFilename())
+    );
 
     return ResponseEntity.ok(ApiResponse.success(IMAGES_RETRIEVED, responses));
   }
