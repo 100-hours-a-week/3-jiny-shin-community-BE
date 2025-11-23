@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
+import com.jinyshin.ktbcommunity.domain.image.service.FileService;
 import com.jinyshin.ktbcommunity.domain.image.service.ImageService;
 import com.jinyshin.ktbcommunity.global.exception.ApiErrorCode;
 import com.jinyshin.ktbcommunity.global.exception.ApiException;
@@ -49,14 +50,19 @@ class ImageControllerTest {
   @MockitoBean
   private ImageService imageService;
 
+  @MockitoBean
+  private FileService fileService;
+
   @Test
-  @DisplayName("POST /api/images - 정상적인 이미지 업로드 시 201 Created를 반환한다")
-  void uploadImage_ValidImage_Returns201Created() throws Exception {
+  @DisplayName("POST /api/images - 정상적인 이미지 업로드 시 201 Created와 S3 URL을 반환한다")
+  void uploadImage_ValidImage_Returns201CreatedWithS3Url() throws Exception {
     // Given
     MockMultipartFile file = createMockImageFile("test.jpg", "image/jpeg");
-    Image mockImage = new Image("test-profile.jpg", ImageType.PROFILE);
+    Image mockImage = new Image("test_profile.jpg", ImageType.PROFILE);
+    String s3Url = "https://ktb-community-images.s3.ap-northeast-2.amazonaws.com/dev/profile/test_profile.jpg";
 
     given(imageService.uploadImage(any(), any())).willReturn(mockImage);
+    given(fileService.getPublicUrl("test_profile.jpg")).willReturn(s3Url);
 
     // When & Then
     mockMvc.perform(multipart("/api/images")
@@ -64,11 +70,12 @@ class ImageControllerTest {
             .param("imageType", "PROFILE"))
         .andDo(print())
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.message").value("이미지 업로드 성공"))
-        .andExpect(jsonPath("$.data.filename").value("test-profile.jpg"))
+        .andExpect(jsonPath("$.data.filename").value("test_profile.jpg"))
+        .andExpect(jsonPath("$.data.imageUrl").value(s3Url))
         .andExpect(jsonPath("$.data.imageType").value("PROFILE"));
 
     verify(imageService, times(1)).uploadImage(any(), any());
+    verify(fileService, times(1)).getPublicUrl("test_profile.jpg");
   }
 
   @Test
@@ -91,54 +98,67 @@ class ImageControllerTest {
   }
 
   @Test
-  @DisplayName("GET /api/images/{imageId} - 존재하는 이미지 조회 시 200 OK를 반환한다")
-  void getImage_ExistingImage_Returns200OK() throws Exception {
+  @DisplayName("GET /api/images/{imageId} - 존재하는 이미지 조회 시 200 OK와 S3 URL을 반환한다")
+  void getImage_ExistingImage_Returns200OKWithS3Url() throws Exception {
     // Given
     Long imageId = 1L;
-    Image mockImage = createMockImage("test.jpg", ImageType.PROFILE);
+    Image mockImage = createMockImage("test_profile.jpg", ImageType.PROFILE);
+    String s3Url = "https://ktb-community-images.s3.ap-northeast-2.amazonaws.com/dev/profile/test_profile.jpg";
 
     given(imageService.getImage(imageId)).willReturn(mockImage);
+    given(fileService.getPublicUrl("test_profile.jpg")).willReturn(s3Url);
 
     // When & Then
     mockMvc.perform(get("/api/images/{imageId}", imageId))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("이미지 조회 성공"))
-        .andExpect(jsonPath("$.data.filename").value("test.jpg"))
+        .andExpect(jsonPath("$.data.filename").value("test_profile.jpg"))
+        .andExpect(jsonPath("$.data.imageUrl").value(s3Url))
         .andExpect(jsonPath("$.data.imageType").value("PROFILE"));
 
     verify(imageService, times(1)).getImage(imageId);
+    verify(fileService, times(1)).getPublicUrl("test_profile.jpg");
   }
 
   @Test
-  @DisplayName("GET /api/images/{imageId} - 존재하지 않는 이미지 조회 시 500 Internal Server Error를 반환한다")
-  void getImage_NonExistingImage_Returns500InternalServerError() throws Exception {
+  @DisplayName("GET /api/images/{imageId} - 존재하지 않는 이미지 조회 시 404 Not Found를 반환한다")
+  void getImage_NonExistingImage_Returns404NotFound() throws Exception {
     // Given
     Long imageId = 999L;
 
     given(imageService.getImage(imageId))
-        .willThrow(new ApiException(ApiErrorCode.IMAGE_PROCESSING_FAILED));
+        .willThrow(new ApiException(ApiErrorCode.IMAGE_NOT_FOUND));
 
     // When & Then
     mockMvc.perform(get("/api/images/{imageId}", imageId))
         .andDo(print())
-        .andExpect(status().isInternalServerError())
+        .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.message").exists());
 
     verify(imageService, times(1)).getImage(imageId);
   }
 
   @Test
-  @DisplayName("GET /api/images - 여러 이미지 조회 시 200 OK를 반환한다")
-  void getImages_MultipleImageIds_Returns200OK() throws Exception {
+  @DisplayName("GET /api/images - 여러 이미지 조회 시 200 OK와 S3 URL들을 반환한다")
+  void getImages_MultipleImageIds_Returns200OKWithS3Urls() throws Exception {
     // Given
     List<Image> mockImages = List.of(
-        createMockImage("image1.jpg", ImageType.PROFILE),
-        createMockImage("image2.jpg", ImageType.POST_CONTENTS),
-        createMockImage("image3.jpg", ImageType.POST_THUMBNAIL)
+        createMockImage("image1_profile.jpg", ImageType.PROFILE),
+        createMockImage("image2_post_content.jpg", ImageType.POST_CONTENTS),
+        createMockImage("image3_post_thumbnail.jpg", ImageType.POST_THUMBNAIL)
     );
 
     given(imageService.getImages(anyList())).willReturn(mockImages);
+    given(fileService.getPublicUrl("image1_profile.jpg"))
+        .willReturn(
+            "https://ktb-community-images.s3.ap-northeast-2.amazonaws.com/dev/profile/image1_profile.jpg");
+    given(fileService.getPublicUrl("image2_post_content.jpg"))
+        .willReturn(
+            "https://ktb-community-images.s3.ap-northeast-2.amazonaws.com/dev/post_content/image2_post_content.jpg");
+    given(fileService.getPublicUrl("image3_post_thumbnail.jpg"))
+        .willReturn(
+            "https://ktb-community-images.s3.ap-northeast-2.amazonaws.com/dev/post_thumbnail/image3_post_thumbnail.jpg");
 
     // When & Then
     mockMvc.perform(get("/api/images")
@@ -147,9 +167,9 @@ class ImageControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.message").value("이미지 목록 조회 성공"))
         .andExpect(jsonPath("$.data.length()").value(3))
-        .andExpect(jsonPath("$.data[0].filename").value("image1.jpg"))
-        .andExpect(jsonPath("$.data[1].filename").value("image2.jpg"))
-        .andExpect(jsonPath("$.data[2].filename").value("image3.jpg"));
+        .andExpect(jsonPath("$.data[0].filename").value("image1_profile.jpg"))
+        .andExpect(jsonPath("$.data[1].filename").value("image2_post_content.jpg"))
+        .andExpect(jsonPath("$.data[2].filename").value("image3_post_thumbnail.jpg"));
 
     verify(imageService, times(1)).getImages(anyList());
   }

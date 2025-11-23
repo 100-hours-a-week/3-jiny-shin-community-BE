@@ -52,12 +52,12 @@ class ImageServiceTest {
     MultipartFile mockFile = createMockImageFile("test.jpg", "image/jpeg");
     ImageType imageType = ImageType.PROFILE;
 
-    // FileService Mock 설정
+    // FileService Mock 설정 (S3 Key 반환)
     given(fileService.saveFile(any(File.class), anyString()))
-        .willReturn("/uploads/test-profile.jpg");
+        .willReturn("dev/profile/abc123_profile.jpg");
 
     // ImageRepository Mock 설정
-    Image savedImage = new Image("test-profile.jpg", imageType);
+    Image savedImage = new Image("abc123_profile.jpg", imageType);
     given(imageRepository.save(any(Image.class))).willReturn(savedImage);
 
     // When
@@ -65,7 +65,7 @@ class ImageServiceTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(result.getFilename()).isEqualTo("test-profile.jpg");
+    assertThat(result.getFilename()).isEqualTo("abc123_profile.jpg");
     assertThat(result.getImageType()).isEqualTo(imageType);
 
     verify(fileService, times(1)).saveFile(any(File.class), anyString());
@@ -115,7 +115,7 @@ class ImageServiceTest {
     // When & Then
     assertThatThrownBy(() -> imageService.getImage(imageId))
         .isInstanceOf(ApiException.class)
-        .hasFieldOrPropertyWithValue("errorCode", ApiErrorCode.IMAGE_PROCESSING_FAILED);
+        .hasFieldOrPropertyWithValue("errorCode", ApiErrorCode.IMAGE_NOT_FOUND);
 
     verify(imageRepository, times(1)).findById(imageId);
   }

@@ -3,7 +3,6 @@ package com.jinyshin.ktbcommunity.domain.image.processor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.jinyshin.ktbcommunity.domain.image.dto.ProcessedFiles;
 import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
 import com.jinyshin.ktbcommunity.global.exception.ApiErrorCode;
 import com.jinyshin.ktbcommunity.global.exception.ApiException;
@@ -41,10 +40,10 @@ class ImageProcessorTest {
     MultipartFile mockFile = createMockImageFile("test-image.jpg", "image/jpeg");
 
     // When
-    ProcessedFiles result = imageProcessor.processImage(mockFile, ImageType.PROFILE);
+    File result = imageProcessor.processImage(mockFile, ImageType.PROFILE);
 
     // Then
-    createdJpgFile = result.getJpgFile();
+    createdJpgFile = result;
 
     assertThat(createdJpgFile).isNotNull().exists();
     assertThat(createdJpgFile.getName()).contains("profile").endsWith(".jpg");
@@ -97,22 +96,22 @@ class ImageProcessorTest {
     MultipartFile mockFile = createMockImageFile("test.jpg", "image/jpeg");
 
     // When
-    ProcessedFiles profileResult = imageProcessor.processImage(mockFile,
+    File profileResult = imageProcessor.processImage(mockFile,
         ImageType.PROFILE);
-    ProcessedFiles contentResult = imageProcessor.processImage(mockFile,
+    File contentResult = imageProcessor.processImage(mockFile,
         ImageType.POST_CONTENTS);
-    ProcessedFiles thumbnailResult = imageProcessor.processImage(mockFile,
+    File thumbnailResult = imageProcessor.processImage(mockFile,
         ImageType.POST_THUMBNAIL);
 
     // Then
-    assertThat(profileResult.getJpgFile().getName()).contains("profile");
-    assertThat(contentResult.getJpgFile().getName()).contains("post_content");
-    assertThat(thumbnailResult.getJpgFile().getName()).contains("post_thumbnail");
+    assertThat(profileResult.getName()).contains("profile");
+    assertThat(contentResult.getName()).contains("post_content");
+    assertThat(thumbnailResult.getName()).contains("post_thumbnail");
 
     // Cleanup
-    profileResult.getJpgFile().delete();
-    contentResult.getJpgFile().delete();
-    thumbnailResult.getJpgFile().delete();
+    profileResult.delete();
+    contentResult.delete();
+    thumbnailResult.delete();
   }
 
   /**

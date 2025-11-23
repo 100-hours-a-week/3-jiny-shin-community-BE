@@ -20,3 +20,10 @@ logging:
 file:
   upload:
     path: ./test-uploads
+
+cloud:
+  aws:
+    access-key: test-access-key
+    secret-key: test-secret-key
+    region: ap-northeast-2
+    bucket: test-bucket
