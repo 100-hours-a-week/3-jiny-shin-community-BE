@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: dev
 
   servlet:
     multipart:
@@ -39,3 +39,10 @@ management:
 file:
   upload:
     path: ${FILE_UPLOAD_PATH:./uploads}
+
+cloud:
+  aws:
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+    region: ap-northeast-2
+    bucket: ktb-community-images
