@@ -34,7 +34,13 @@ public enum ApiErrorCode {
   IMAGE_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "image_invalid_format"),
   IMAGE_PROCESSING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "image_processing_failed"),
   IMAGE_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "image_save_failed"),
-  IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "image_delete_failed");
+  IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "image_delete_failed"),
+
+  FILE_NOT_FOUND_IN_S3(HttpStatus.BAD_REQUEST, "file_not_found_in_s3"),
+  STORED_FILENAME_REQUIRED(HttpStatus.BAD_REQUEST, "stored_filename_required"),
+  ORIGINAL_EXTENSION_REQUIRED(HttpStatus.BAD_REQUEST, "original_extension_required"),
+  IMAGE_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "image_type_required"),
+  INVALID_FILENAME_FORMAT(HttpStatus.BAD_REQUEST, "invalid_filename_format");
 
   private final HttpStatus status;
   private final String message;

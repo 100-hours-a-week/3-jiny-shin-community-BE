@@ -6,8 +6,11 @@ import java.time.LocalDateTime;
 public record ImageResponse(
     Long imageId,
     ImageType imageType,
-    String filename,
-    String imageUrl,
+    String storedFilename,
+    String originalExtension,
+    String originalUrl,
+    String jpgUrl,
+    String webpUrl,
     LocalDateTime createdAt
 ) {
 

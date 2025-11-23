@@ -21,7 +21,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "images", indexes = {
-    @Index(name = "idx_images_deleted_at", columnList = "deleted_at")
+    @Index(name = "idx_images_deleted_at", columnList = "deleted_at"),
+    @Index(name = "idx_images_stored_filename", columnList = "stored_filename")
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -35,8 +36,11 @@ public class Image {
   @Column(name = "image_id", nullable = false)
   private Long imageId;
 
-  @Column(name = "filename", nullable = false, length = 500)
-  private String filename;
+  @Column(name = "stored_filename", nullable = false, length = 255)
+  private String storedFilename;
+
+  @Column(name = "original_extension", nullable = false, length = 10)
+  private String originalExtension;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "image_type", nullable = false, length = 20)
@@ -49,8 +53,9 @@ public class Image {
   @Column(name = "deleted_at")
   private LocalDateTime deletedAt;
 
-  public Image(String filename, ImageType imageType) {
-    this.filename = filename;
+  public Image(String storedFilename, String originalExtension, ImageType imageType) {
+    this.storedFilename = storedFilename;
+    this.originalExtension = originalExtension;
     this.imageType = imageType;
   }
 }

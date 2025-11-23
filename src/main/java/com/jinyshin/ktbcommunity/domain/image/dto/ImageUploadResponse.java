@@ -5,8 +5,11 @@ import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
 public record ImageUploadResponse(
     Long imageId,
     ImageType imageType,
-    String filename,
-    String imageUrl
+    String storedFilename,
+    String originalExtension,
+    String originalUrl,
+    String jpgUrl,
+    String webpUrl
 ) {
 
 }

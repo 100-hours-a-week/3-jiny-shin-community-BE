@@ -36,6 +36,7 @@ public final class ApiMessages {
 
   // Image
   public static final String IMAGE_UPLOADED = "이미지 업로드 성공";
+  public static final String IMAGE_METADATA_SAVED = "이미지 메타정보 저장 성공";
   public static final String IMAGE_RETRIEVED = "이미지 조회 성공";
   public static final String IMAGES_RETRIEVED = "이미지 목록 조회 성공";
   public static final String IMAGE_DELETED = "이미지 삭제 성공";
