@@ -1,68 +1,74 @@
 package com.jinyshin.ktbcommunity.domain.image.util;
 
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
-import com.jinyshin.ktbcommunity.domain.image.service.FileService;
+import com.jinyshin.ktbcommunity.domain.image.service.S3Service;
+import com.jinyshin.ktbcommunity.global.config.S3Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * 이미지 URL 생성 전담 컴포넌트
- */
 @Component
 @RequiredArgsConstructor
 public class ImageUrlGenerator {
 
-  private final FileService fileService;
+  private final S3Service s3Service;
+  private final S3Properties s3Properties;
 
   /**
-   * 고품질 이미지 URL 생성
-   */
-  public ImageUrls generateUrls(Image image) {
-    return generateUrls(image, false);
-  }
-
-  /**
-   * 이미지 URL 생성
+   * 게시물 이미지 URL 생성
    *
-   * @param image       Image 엔티티
-   * @param useThumbnail 썸네일 사용 여부 (true: 썸네일, false: 고품질)
+   * @param image        Image 엔티티
+   * @param useThumbnail 썸네일 사용 여부 (true: 썸네일, false: 본문)
+   * @return ImageUrls (jpgUrl, webpUrl)
    */
-  public ImageUrls generateUrls(Image image, boolean useThumbnail) {
-    String jpgUrl = generateJpgUrl(image, useThumbnail);
-    String webpUrl = generateWebpUrl(image, useThumbnail);
-
-    return new ImageUrls(jpgUrl, webpUrl);
-  }
-
-  /**
-   * JPG URL 생성 (썸네일/고품질 선택)
-   */
-  private String generateJpgUrl(Image image, boolean useThumbnail) {
+  public ImageUrls generatePostUrls(Image image, boolean useThumbnail) {
+    String s3Path = image.getS3Path();
     String storedFilename = image.getStoredFilename();
+    String baseKey = s3Path + "/" + storedFilename;
 
     if (useThumbnail) {
-      String thumbFilename = storedFilename + "_thumb.jpg";
-      if (fileService.existsFile(thumbFilename)) {
-        return fileService.getPublicUrl(thumbFilename);
+      // 썸네일 파일 확인 → 없으면 본문 이미지로 fallback
+      String thumbJpgKey = baseKey + "_thumb.jpg";
+      String thumbWebpKey = baseKey + "_thumb.webp";
+
+      if (s3Service.imageExists(thumbJpgKey)) {
+        return new ImageUrls(
+            buildS3Url(thumbJpgKey),
+            buildS3Url(thumbWebpKey)
+        );
       }
     }
 
-    return fileService.getPublicUrl(storedFilename + ".jpg");
+    // 본문 이미지 반환
+    return new ImageUrls(
+        buildS3Url(baseKey + ".jpg"),
+        buildS3Url(baseKey + ".webp")
+    );
   }
 
   /**
-   * WebP URL 생성 (썸네일/고품질 선택)
+   * 프로필 이미지 URL 생성 (항상 최적화이미지)
+   *
+   * @param image Image 엔티티
+   * @return ImageUrls (jpgUrl, webpUrl)
    */
-  private String generateWebpUrl(Image image, boolean useThumbnail) {
+  public ImageUrls generateProfileUrls(Image image) {
+    String s3Path = image.getS3Path();
     String storedFilename = image.getStoredFilename();
+    String baseKey = s3Path + "/" + storedFilename;
 
-    if (useThumbnail) {
-      String thumbFilename = storedFilename + "_thumb.webp";
-      if (fileService.existsFile(thumbFilename)) {
-        return fileService.getPublicUrl(thumbFilename);
-      }
-    }
+    // 프로필은 항상 기본 파일 (최적화이미지)
+    return new ImageUrls(
+        buildS3Url(baseKey + ".jpg"),
+        buildS3Url(baseKey + ".webp")
+    );
+  }
 
-    return fileService.getPublicUrl(storedFilename + ".webp");
+  /**
+   * S3 URL 생성
+   */
+  private String buildS3Url(String s3Key) {
+    String bucketName = s3Properties.getBucket();
+    String region = s3Properties.getRegion();
+    return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, s3Key);
   }
 }

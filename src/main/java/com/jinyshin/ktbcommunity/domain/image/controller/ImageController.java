@@ -1,31 +1,21 @@
 package com.jinyshin.ktbcommunity.domain.image.controller;
 
-import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGES_RETRIEVED;
-import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_DELETED;
-import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_RETRIEVED;
-import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_UPLOADED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_METADATA_SAVED;
 
-import com.jinyshin.ktbcommunity.domain.image.dto.ImageMapper;
-import com.jinyshin.ktbcommunity.domain.image.dto.ImageResponse;
-import com.jinyshin.ktbcommunity.domain.image.dto.ImageUploadResponse;
+import com.jinyshin.ktbcommunity.domain.image.dto.ImageMetadataRequest;
+import com.jinyshin.ktbcommunity.domain.image.dto.ImageMetadataResponse;
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
-import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
-import com.jinyshin.ktbcommunity.domain.image.service.FileService;
 import com.jinyshin.ktbcommunity.domain.image.service.ImageService;
 import com.jinyshin.ktbcommunity.global.api.ApiResponse;
-import java.util.List;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/images")
@@ -34,47 +24,24 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageController {
 
   private final ImageService imageService;
-  private final FileService fileService;
-  
-  @PostMapping
-  public ResponseEntity<ApiResponse<ImageUploadResponse>> uploadImage(
-      @RequestParam("file") MultipartFile file,
-      @RequestParam("imageType") ImageType imageType) {
 
-    Image savedImage = imageService.uploadImage(file, imageType);
-    String imageUrl = fileService.getPublicUrl(savedImage.getFilename());
-    ImageUploadResponse response = ImageMapper.toImageUploadResponse(savedImage, imageUrl);
+  @PostMapping("/metadata")
+  public ResponseEntity<ApiResponse<ImageMetadataResponse>> saveMetadata(
+      @Valid @RequestBody ImageMetadataRequest request
+  ) {
+    Image image = imageService.saveMetadata(request);
 
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponse.success(IMAGE_UPLOADED, response));
-  }
-
-  @GetMapping("/{imageId}")
-  public ResponseEntity<ApiResponse<ImageResponse>> getImage(@PathVariable Long imageId) {
-    Image image = imageService.getImage(imageId);
-    String imageUrl = fileService.getPublicUrl(image.getFilename());
-    ImageResponse response = ImageMapper.toImageResponse(image, imageUrl);
-
-    return ResponseEntity.ok(ApiResponse.success(IMAGE_RETRIEVED, response));
-  }
-
-  @GetMapping
-  public ResponseEntity<ApiResponse<List<ImageResponse>>> getImages(
-      @RequestParam("imageIds") List<Long> imageIds) {
-
-    List<Image> images = imageService.getImages(imageIds);
-    List<ImageResponse> responses = ImageMapper.toImageResponses(
-        images,
-        image -> fileService.getPublicUrl(image.getFilename())
+    ImageMetadataResponse response = new ImageMetadataResponse(
+        image.getImageId(),
+        image.getStoredFilename(),
+        image.getOriginalExtension(),
+        image.getS3Path(),
+        image.getImageType(),
+        image.getCreatedAt()
     );
 
-    return ResponseEntity.ok(ApiResponse.success(IMAGES_RETRIEVED, responses));
-  }
-
-  @DeleteMapping("/{imageId}")
-  public ResponseEntity<ApiResponse<Void>> deleteImage(@PathVariable Long imageId) {
-    imageService.deleteImage(imageId);
-
-    return ResponseEntity.ok(ApiResponse.success(IMAGE_DELETED, null));
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(ApiResponse.success(IMAGE_METADATA_SAVED, response));
   }
 }

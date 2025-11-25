@@ -42,6 +42,9 @@ public class Image {
   @Column(name = "original_extension", nullable = false, length = 10)
   private String originalExtension;
 
+  @Column(name = "s3_path", nullable = false, length = 100)
+  private String s3Path;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "image_type", nullable = false, length = 20)
   private ImageType imageType;
@@ -53,9 +56,10 @@ public class Image {
   @Column(name = "deleted_at")
   private LocalDateTime deletedAt;
 
-  public Image(String storedFilename, String originalExtension, ImageType imageType) {
+  public Image(String storedFilename, String originalExtension, String s3Path, ImageType imageType) {
     this.storedFilename = storedFilename;
     this.originalExtension = originalExtension;
+    this.s3Path = s3Path;
     this.imageType = imageType;
   }
 }

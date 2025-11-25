@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record ImageUploadRequest(
+public record ImageMetadataRequest(
     @NotBlank(message = "storedFilename은 필수입니다")
     @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "파일명은 영문, 숫자, -, _만 가능합니다")
     String storedFilename,
@@ -15,6 +15,10 @@ public record ImageUploadRequest(
     @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "확장자는 영문, 숫자만 가능합니다")
     @Size(max = 10, message = "확장자는 10자 이하여야 합니다")
     String originalExtension,
+
+    @NotBlank(message = "s3Path는 필수입니다")
+    @Size(max = 100, message = "s3Path는 100자 이하여야 합니다")
+    String s3Path,
 
     @NotNull(message = "imageType은 필수입니다")
     ImageType imageType
