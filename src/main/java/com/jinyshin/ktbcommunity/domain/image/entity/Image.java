@@ -14,21 +14,18 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "images", indexes = {
-    @Index(name = "idx_images_deleted_at", columnList = "deleted_at"),
+    @Index(name = "idx_images_status_created_at", columnList = "status, created_at"),
+    @Index(name = "idx_images_status_deleted_at", columnList = "status, deleted_at"),
     @Index(name = "idx_images_stored_filename", columnList = "stored_filename")
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@SQLDelete(sql = "UPDATE images SET deleted_at = NOW() WHERE image_id = ?")
-@SQLRestriction("deleted_at IS NULL")
 public class Image {
 
   @Id
@@ -49,6 +46,10 @@ public class Image {
   @Column(name = "image_type", nullable = false, length = 20)
   private ImageType imageType;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false, length = 20)
+  private ImageStatus status = ImageStatus.TEMP;
+
   @CreatedDate
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -56,10 +57,28 @@ public class Image {
   @Column(name = "deleted_at")
   private LocalDateTime deletedAt;
 
-  public Image(String storedFilename, String originalExtension, String s3Path, ImageType imageType) {
+  public Image(String storedFilename, String originalExtension, String s3Path,
+      ImageType imageType) {
     this.storedFilename = storedFilename;
     this.originalExtension = originalExtension;
     this.s3Path = s3Path;
     this.imageType = imageType;
+  }
+
+  public void markAsActive() {
+    this.status = ImageStatus.ACTIVE;
+  }
+
+  public void markAsDeleted() {
+    this.status = ImageStatus.DELETED;
+    this.deletedAt = LocalDateTime.now();
+  }
+
+  public boolean isExpired(int hours) {
+    if (this.status != ImageStatus.TEMP) {
+      return false;
+    }
+    LocalDateTime expirationTime = this.createdAt.plusHours(hours);
+    return LocalDateTime.now().isAfter(expirationTime);
   }
 }

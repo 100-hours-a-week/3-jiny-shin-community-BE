@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ImageType {
   PROFILE("프로필 이미지"),
-  POST_CONTENTS("게시글 이미지");
+  POST("게시글 이미지");
 
   private final String description;
 }
