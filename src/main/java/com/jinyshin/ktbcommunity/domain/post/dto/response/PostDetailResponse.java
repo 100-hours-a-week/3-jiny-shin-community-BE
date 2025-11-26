@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record PostDetailResponse(
-    Long id,
+    Long postId,
     String title,
     String content,
     AuthorInfo author,
@@ -16,7 +16,7 @@ public record PostDetailResponse(
     LocalDateTime updatedAt,
     Boolean isLiked,
     Boolean isAuthor,
-    List<String> contentImageUrls
+    List<PostImageResponse> images
 ) {
 
 }
