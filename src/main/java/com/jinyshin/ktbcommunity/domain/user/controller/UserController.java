@@ -3,6 +3,7 @@ package com.jinyshin.ktbcommunity.domain.user.controller;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.EMAIL_CHECKED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.NICKNAME_CHECKED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PASSWORD_UPDATED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PROFILE_IMAGE_DELETED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PROFILE_UPDATED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.SIGNUP_SUCCESS;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.USER_RETRIEVED;
@@ -79,6 +80,12 @@ public class UserController {
       @RequestParam String nickname) {
     AvailabilityResponse response = userService.checkNickname(nickname);
     return ResponseEntity.ok(ApiResponse.success(NICKNAME_CHECKED, response));
+  }
+
+  @DeleteMapping("/me/profile-image")
+  public ResponseEntity<ApiResponse<Void>> deleteProfileImage(@RequestAttribute Long userId) {
+    userService.deleteProfileImage(userId);
+    return ResponseEntity.ok(ApiResponse.success(PROFILE_IMAGE_DELETED, null));
   }
 
   @DeleteMapping("/me")
