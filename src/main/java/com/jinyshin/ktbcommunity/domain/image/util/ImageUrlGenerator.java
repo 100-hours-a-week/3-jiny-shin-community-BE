@@ -1,5 +1,6 @@
 package com.jinyshin.ktbcommunity.domain.image.util;
 
+import com.jinyshin.ktbcommunity.domain.image.dto.response.ImageUrlsResponse;
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.domain.image.service.S3Service;
 import com.jinyshin.ktbcommunity.global.config.S3Properties;
@@ -20,7 +21,7 @@ public class ImageUrlGenerator {
    * @param useThumbnail 썸네일 사용 여부 (true: 썸네일, false: 본문)
    * @return ImageUrls (jpgUrl, webpUrl)
    */
-  public ImageUrls generatePostUrls(Image image, boolean useThumbnail) {
+  public ImageUrlsResponse generatePostUrls(Image image, boolean useThumbnail) {
     String s3Path = image.getS3Path();
     String storedFilename = image.getStoredFilename();
     String baseKey = s3Path + "/" + storedFilename;
@@ -31,7 +32,7 @@ public class ImageUrlGenerator {
       String thumbWebpKey = baseKey + "_thumb.webp";
 
       if (s3Service.imageExists(thumbJpgKey)) {
-        return new ImageUrls(
+        return new ImageUrlsResponse(
             buildS3Url(thumbJpgKey),
             buildS3Url(thumbWebpKey)
         );
@@ -39,7 +40,7 @@ public class ImageUrlGenerator {
     }
 
     // 본문 이미지 반환
-    return new ImageUrls(
+    return new ImageUrlsResponse(
         buildS3Url(baseKey + ".jpg"),
         buildS3Url(baseKey + ".webp")
     );
@@ -51,13 +52,13 @@ public class ImageUrlGenerator {
    * @param image Image 엔티티
    * @return ImageUrls (jpgUrl, webpUrl)
    */
-  public ImageUrls generateProfileUrls(Image image) {
+  public ImageUrlsResponse generateProfileUrls(Image image) {
     String s3Path = image.getS3Path();
     String storedFilename = image.getStoredFilename();
     String baseKey = s3Path + "/" + storedFilename;
 
     // 프로필은 항상 기본 파일 (최적화이미지)
-    return new ImageUrls(
+    return new ImageUrlsResponse(
         buildS3Url(baseKey + ".jpg"),
         buildS3Url(baseKey + ".webp")
     );
