@@ -1,5 +1,6 @@
 package com.jinyshin.ktbcommunity.domain.post.dto.request;
 
+import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.MAX_POST_IMAGES;
 import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.POST_CONTENT_MAX;
 import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.POST_CONTENT_MIN;
 import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.POST_TITLE_MAX;
@@ -15,7 +16,10 @@ public record UpdatePostRequest(
     @Size(min = POST_CONTENT_MIN, max = POST_CONTENT_MAX, message = "본문은 2자 이상 10,000자 이하여야 합니다.")
     String content,
 
-    List<Long> imageIds
+    @Size(max = MAX_POST_IMAGES, message = "이미지는 최대 5장까지 첨부할 수 있습니다.")
+    List<Long> imageIds,
+
+    Long primaryImageId  // 사용자가 선택한 대표 이미지 ID (이미지 없으면 null)
 ) {
 
 }

@@ -10,11 +10,19 @@ public class BadRequestException extends ApiException {
     return new BadRequestException(ApiErrorCode.SAME_AS_CURRENT_PASSWORD);
   }
 
-  public static BadRequestException noFieldsToUpdate() {
-    return new BadRequestException(ApiErrorCode.NO_FIELDS_TO_UPDATE);
+  public static BadRequestException primaryImageNotInImageIds() {
+    return new BadRequestException(ApiErrorCode.PRIMARY_IMAGE_NOT_IN_IMAGE_IDS);
   }
 
-  public static BadRequestException primaryImageNotInList() {
-    return new BadRequestException(ApiErrorCode.PRIMARY_IMAGE_NOT_IN_LIST);
+  public static BadRequestException primaryImageNotFoundInPost() {
+    return new BadRequestException(ApiErrorCode.PRIMARY_IMAGE_NOT_FOUND_IN_POST);
+  }
+
+  public static BadRequestException imageExpired() {
+    return new BadRequestException(ApiErrorCode.IMAGE_EXPIRED);
+  }
+
+  public static BadRequestException imageAlreadyUsed() {
+    return new BadRequestException(ApiErrorCode.IMAGE_ALREADY_USED);
   }
 }

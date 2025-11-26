@@ -8,7 +8,6 @@ public enum ApiErrorCode {
 
   INVALID_REQUEST(HttpStatus.BAD_REQUEST, "invalid_request"),
   SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "same_as_current_password"),
-  NO_FIELDS_TO_UPDATE(HttpStatus.BAD_REQUEST, "no_fields_to_update"),
   INVALID_QUERY_PARAMETERS(HttpStatus.BAD_REQUEST, "invalid_query_parameters"),
   EMPTY_CONTENTS(HttpStatus.BAD_REQUEST, "empty_contents"),
   INVALID_TITLE_LENGTH(HttpStatus.BAD_REQUEST, "invalid_title_length"),
@@ -29,7 +28,10 @@ public enum ApiErrorCode {
 
   // image
   IMAGE_FILE_EMPTY(HttpStatus.BAD_REQUEST, "image_file_empty"),
-  PRIMARY_IMAGE_NOT_IN_LIST(HttpStatus.BAD_REQUEST, "primary_image_not_in_list"),
+  PRIMARY_IMAGE_NOT_IN_IMAGE_IDS(HttpStatus.BAD_REQUEST, "primary_image_not_in_image_ids"),
+  PRIMARY_IMAGE_NOT_FOUND_IN_POST(HttpStatus.BAD_REQUEST, "primary_image_not_found_in_post"),
+  IMAGE_EXPIRED(HttpStatus.BAD_REQUEST, "image_expired"),
+  IMAGE_ALREADY_USED(HttpStatus.BAD_REQUEST, "image_already_used"),
   IMAGE_FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "image_file_too_large"),
   IMAGE_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "image_invalid_format"),
   IMAGE_PROCESSING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "image_processing_failed"),
