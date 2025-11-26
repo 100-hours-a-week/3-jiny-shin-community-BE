@@ -24,4 +24,6 @@ public interface UserService {
   AvailabilityResponse checkNickname(String nickname);
 
   void deleteUser(Long userId);
+
+  void deleteProfileImage(Long userId);
 }

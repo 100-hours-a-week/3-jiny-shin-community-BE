@@ -11,6 +11,7 @@ public final class ValidationConstants {
   public static final int POST_CONTENT_MIN = 2;
   public static final int POST_CONTENT_MAX = 10_000;
   public static final int POST_CONTENT_PREVIEW_LENGTH = 100;
+  public static final int MAX_POST_IMAGES = 5;
 
   // Comment
   public static final int COMMENT_CONTENT_MIN = 1;

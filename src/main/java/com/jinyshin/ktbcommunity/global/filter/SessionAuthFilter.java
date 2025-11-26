@@ -2,7 +2,7 @@ package com.jinyshin.ktbcommunity.global.filter;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jinyshin.ktbcommunity.global.api.ApiResponse;
+import com.jinyshin.ktbcommunity.global.common.BaseResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,9 +22,10 @@ public class SessionAuthFilter extends OncePerRequestFilter {
 
   // 인증 없이 접근 가능한 경로 (메서드 무관)
   private static final String[] PUBLIC_PATHS = {
-      "/auth/login",
-      "/users/check-email",
-      "/users/check-nickname",
+      "/api/auth/login",
+      "/api/users/check-email",
+      "/api/users/check-nickname",
+      "/api/images/metadata",
       "/actuator/health"
   };
 
@@ -40,8 +41,13 @@ public class SessionAuthFilter extends OncePerRequestFilter {
       return true;
     }
 
+    // Swagger UI 및 API 문서 허용
+    if (uri.startsWith("/swagger-ui") || uri.startsWith("/v3/api-docs")) {
+      return true;
+    }
+
     // 회원가입 API 요청(POST) 허용
-    if ("/users".equals(uri) && "POST".equals(method)) {
+    if ("/api/users".equals(uri) && "POST".equals(method)) {
       return true;
     }
 
@@ -60,7 +66,7 @@ public class SessionAuthFilter extends OncePerRequestFilter {
 
     // 비회원 접근 가능한 엔드포인트
     boolean isPublicReadEndpoint = "GET".equals(method) &&
-        (uri.equals("/posts") || uri.startsWith("/posts/"));
+        (uri.equals("/api/posts") || uri.startsWith("/api/posts/"));
 
     HttpSession session = request.getSession(false);
 
@@ -103,7 +109,7 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
 
-    ApiResponse<Void> apiResponse = ApiResponse.error(message);
+    BaseResponse<Void> apiResponse = BaseResponse.error(message);
     String json = objectMapper.writeValueAsString(apiResponse);
     response.getWriter().write(json);
   }
