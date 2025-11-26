@@ -4,6 +4,8 @@ import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.DEF
 import static com.jinyshin.ktbcommunity.global.constants.ValidationConstants.MAX_PAGE_LIMIT;
 
 import com.jinyshin.ktbcommunity.domain.comment.dto.CommentMapper;
+import com.jinyshin.ktbcommunity.domain.image.dto.response.ImageUrlsResponse;
+import com.jinyshin.ktbcommunity.domain.image.util.ImageUrlGenerator;
 import com.jinyshin.ktbcommunity.domain.comment.dto.request.CreateCommentRequest;
 import com.jinyshin.ktbcommunity.domain.comment.dto.request.UpdateCommentRequest;
 import com.jinyshin.ktbcommunity.domain.comment.dto.response.CommentInfoResponse;
@@ -33,6 +35,7 @@ public class CommentServiceImpl implements CommentService {
   private final CommentRepository commentRepository;
   private final PostRepository postRepository;
   private final UserRepository userRepository;
+  private final ImageUrlGenerator imageUrlGenerator;
 
   @Override
   @Transactional
@@ -51,7 +54,12 @@ public class CommentServiceImpl implements CommentService {
     // 댓글 추가 시 게시글의 댓글 수 증가
     post.getPostStats().incrementCommentCount();
 
-    return CommentMapper.toCreatedComment(savedComment);
+    // 프로필 이미지 URL 생성
+    ImageUrlsResponse profileImageUrls = savedComment.getAuthor().getProfileImage() != null
+        ? imageUrlGenerator.generateProfileUrls(savedComment.getAuthor().getProfileImage())
+        : null;
+
+    return CommentMapper.toCreatedComment(savedComment, profileImageUrls);
   }
 
   @Override
@@ -84,7 +92,13 @@ public class CommentServiceImpl implements CommentService {
               comment.getAuthor().getUserId(),
               currentUserId
           );
-          return CommentMapper.toCommentInfo(comment, isAuthor);
+
+          // 프로필 이미지 URL 생성
+          ImageUrlsResponse profileImageUrls = comment.getAuthor().getProfileImage() != null
+              ? imageUrlGenerator.generateProfileUrls(comment.getAuthor().getProfileImage())
+              : null;
+
+          return CommentMapper.toCommentInfo(comment, isAuthor, profileImageUrls);
         })
         .collect(Collectors.toList());
 

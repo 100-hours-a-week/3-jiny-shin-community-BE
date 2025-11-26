@@ -1,5 +1,10 @@
 package com.jinyshin.ktbcommunity.domain.user.service;
 
+import com.jinyshin.ktbcommunity.domain.image.dto.response.ImageUrlsResponse;
+import com.jinyshin.ktbcommunity.domain.image.entity.Image;
+import com.jinyshin.ktbcommunity.domain.image.entity.ImageStatus;
+import com.jinyshin.ktbcommunity.domain.image.repository.ImageRepository;
+import com.jinyshin.ktbcommunity.domain.image.util.ImageUrlGenerator;
 import com.jinyshin.ktbcommunity.domain.user.dto.UserMapper;
 import com.jinyshin.ktbcommunity.domain.user.dto.request.PasswordUpdateRequest;
 import com.jinyshin.ktbcommunity.domain.user.dto.request.ProfileUpdateRequest;
@@ -25,6 +30,8 @@ public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final ImageRepository imageRepository;
+  private final ImageUrlGenerator imageUrlGenerator;
 
   @Override
   @Transactional
@@ -42,37 +49,48 @@ public class UserServiceImpl implements UserService {
     // 비밀번호 해싱
     String hashedPassword = passwordEncoder.encode(signUpRequest.password());
 
+    // 프로필 이미지 검증 및 처리
+    Image profileImage = null;
+    if (signUpRequest.profileImageId() != null) {
+      profileImage = validateAndActivateImage(signUpRequest.profileImageId());
+    }
+
     // User 엔티티 생성
     User user = new User(
         signUpRequest.email(),
         signUpRequest.nickname(),
-        hashedPassword
+        hashedPassword,
+        profileImage
     );
-
-    // TODO: 프로필 이미지 로직 추가
 
     // 저장
     User savedUser = userRepository.save(user);
 
+    // 프로필 이미지 URL 생성
+    ImageUrlsResponse profileImageUrls = savedUser.getProfileImage() != null
+        ? imageUrlGenerator.generateProfileUrls(savedUser.getProfileImage())
+        : null;
+
     // Response 반환
-    return UserMapper.toUserInfo(savedUser);
+    return UserMapper.toUserInfo(savedUser, profileImageUrls);
   }
 
   @Override
   public UserInfoResponse getUser(Long userId) {
     User user = userRepository.findByUserIdAndDeletedAtIsNull(userId)
         .orElseThrow(ResourceNotFoundException::user);
-    return UserMapper.toUserInfo(user);
+
+    // 프로필 이미지 URL 생성
+    ImageUrlsResponse profileImageUrls = user.getProfileImage() != null
+        ? imageUrlGenerator.generateProfileUrls(user.getProfileImage())
+        : null;
+
+    return UserMapper.toUserInfo(user, profileImageUrls);
   }
 
   @Override
   @Transactional
   public UpdatedProfileResponse updateProfile(Long userId, ProfileUpdateRequest request) {
-    // 빈 요청 검증
-    if (request.nickname() == null && request.profileImageId() == null) {
-      throw BadRequestException.noFieldsToUpdate();
-    }
-
     User user = userRepository.findByUserIdAndDeletedAtIsNull(userId)
         .orElseThrow(ResourceNotFoundException::user);
 
@@ -86,13 +104,29 @@ public class UserServiceImpl implements UserService {
       newNickname = request.nickname();
     }
 
-    // TODO: 프로필 이미지 로직 추가
+    // 프로필 이미지 변경 처리
+    Image newProfileImage = user.getProfileImage();
+    if (request.profileImageId() != null) {
+      // 새 이미지 검증 및 활성화
+      newProfileImage = validateAndActivateImage(request.profileImageId());
+
+      // 기존 이미지가 있고 새 이미지와 다르면 Soft Delete
+      if (user.getProfileImage() != null
+          && !user.getProfileImage().getImageId().equals(newProfileImage.getImageId())) {
+        user.getProfileImage().markAsDeleted();
+      }
+    }
 
     // 프로필 업데이트
-    user.updateProfile(newNickname, null);  // TODO: Image 추가
+    user.updateProfile(newNickname, newProfileImage);
+
+    // 프로필 이미지 URL 생성
+    ImageUrlsResponse profileImageUrls = user.getProfileImage() != null
+        ? imageUrlGenerator.generateProfileUrls(user.getProfileImage())
+        : null;
 
     // Response 반환
-    return UserMapper.toUpdatedProfile(user);
+    return UserMapper.toUpdatedProfile(user, profileImageUrls);
   }
 
   @Override
@@ -134,5 +168,38 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findByUserIdAndDeletedAtIsNull(userId)
         .orElseThrow(ResourceNotFoundException::user);
     userRepository.delete(user);
+  }
+
+  @Override
+  @Transactional
+  public void deleteProfileImage(Long userId) {
+    User user = userRepository.findByUserIdAndDeletedAtIsNull(userId)
+        .orElseThrow(ResourceNotFoundException::user);
+
+    if (user.getProfileImage() != null) {
+      user.getProfileImage().markAsDeleted();
+      user.updateProfile(user.getNickname(), null);
+    }
+  }
+
+  private Image validateAndActivateImage(Long imageId) {
+    // 이미지 존재 확인
+    Image image = imageRepository.findById(imageId)
+        .orElseThrow(ResourceNotFoundException::image);
+
+    // TEMP 상태 확인
+    if (image.getStatus() != ImageStatus.TEMP) {
+      throw BadRequestException.imageAlreadyUsed();
+    }
+
+    // 1시간 만료 확인
+    if (image.isExpired(1)) {
+      throw BadRequestException.imageExpired();
+    }
+
+    // ACTIVE 상태로 변경
+    image.markAsActive();
+
+    return image;
   }
 }
