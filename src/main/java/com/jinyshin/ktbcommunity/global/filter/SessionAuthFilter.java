@@ -2,7 +2,7 @@ package com.jinyshin.ktbcommunity.global.filter;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jinyshin.ktbcommunity.global.api.ApiResponse;
+import com.jinyshin.ktbcommunity.global.common.BaseResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +38,11 @@ public class SessionAuthFilter extends OncePerRequestFilter {
 
     // CORS preflight 요청 허용
     if ("OPTIONS".equals(method)) {
+      return true;
+    }
+
+    // Swagger UI 및 API 문서 허용
+    if (uri.startsWith("/swagger-ui") || uri.startsWith("/v3/api-docs")) {
       return true;
     }
 
@@ -104,7 +109,7 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
 
-    ApiResponse<Void> apiResponse = ApiResponse.error(message);
+    BaseResponse<Void> apiResponse = BaseResponse.error(message);
     String json = objectMapper.writeValueAsString(apiResponse);
     response.getWriter().write(json);
   }

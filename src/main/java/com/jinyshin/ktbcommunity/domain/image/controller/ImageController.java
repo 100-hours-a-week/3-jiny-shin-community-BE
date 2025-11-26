@@ -6,7 +6,14 @@ import com.jinyshin.ktbcommunity.domain.image.dto.request.ImageMetadataRequest;
 import com.jinyshin.ktbcommunity.domain.image.dto.response.ImageMetadataResponse;
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.domain.image.service.ImageService;
-import com.jinyshin.ktbcommunity.global.api.ApiResponse;
+import com.jinyshin.ktbcommunity.global.common.BaseResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +28,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/images")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Image", description = "이미지 관련 API")
 public class ImageController {
 
   private final ImageService imageService;
 
   @PostMapping("/metadata")
-  public ResponseEntity<ApiResponse<ImageMetadataResponse>> saveMetadata(
+  @Operation(
+      summary = "이미지 메타데이터 저장",
+      description = "Lambda에서 업로드한 이미지의 메타데이터를 DB에 저장합니다."
+  )
+  @ApiResponse(
+      responseCode = "201",
+      description = "메타데이터 저장 성공",
+      content = @Content(schema = @Schema(implementation = BaseResponse.class))
+  )
+  @ApiResponse(
+      responseCode = "400",
+      description = "잘못된 입력값",
+      content = @Content(schema = @Schema(implementation = BaseResponse.class))
+  )
+  public ResponseEntity<BaseResponse<ImageMetadataResponse>> saveMetadata(
+      @Parameter(description = "이미지 메타데이터 요청 데이터")
       @Valid @RequestBody ImageMetadataRequest request
   ) {
     Image image = imageService.saveMetadata(request);
@@ -42,6 +65,6 @@ public class ImageController {
 
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(ApiResponse.success(IMAGE_METADATA_SAVED, response));
+        .body(BaseResponse.success(IMAGE_METADATA_SAVED, response));
   }
 }

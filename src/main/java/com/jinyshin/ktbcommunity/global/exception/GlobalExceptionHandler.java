@@ -1,6 +1,6 @@
 package com.jinyshin.ktbcommunity.global.exception;
 
-import com.jinyshin.ktbcommunity.global.api.ApiResponse;
+import com.jinyshin.ktbcommunity.global.common.BaseResponse;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -16,19 +16,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(ApiException.class)
-  public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException e) {
+  public ResponseEntity<BaseResponse<Void>> handleApiException(ApiException e) {
     log.error("ApiException: {}", e.getMessage());
 
     HttpStatus status = e.getErrorCode().getStatus();
-    ApiResponse<Void> response = e.getValidationErrors() != null
-        ? ApiResponse.error(e.getErrorCode().getMessage(), e.getValidationErrors())
-        : ApiResponse.error(e.getErrorCode().getMessage());
+    BaseResponse<Void> response = e.getValidationErrors() != null
+        ? BaseResponse.error(e.getErrorCode().getMessage(), e.getValidationErrors())
+        : BaseResponse.error(e.getErrorCode().getMessage());
 
     return new ResponseEntity<>(response, status);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<Void>> handleValidationException(
+  public ResponseEntity<BaseResponse<Void>> handleValidationException(
       MethodArgumentNotValidException e) {
     log.error("Validation error: {}", e.getMessage());
 
@@ -39,14 +39,14 @@ public class GlobalExceptionHandler {
       errors.put(fieldName, errorMessage);
     });
 
-    ApiResponse<Void> response = ApiResponse.error("invalid_request", errors);
+    BaseResponse<Void> response = BaseResponse.error("invalid_request", errors);
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception e) {
+  public ResponseEntity<BaseResponse<Void>> handleGenericException(Exception e) {
     log.error("Unexpected error: ", e);
-    ApiResponse<Void> response = ApiResponse.error("internal_server_error");
+    BaseResponse<Void> response = BaseResponse.error("internal_server_error");
     return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
