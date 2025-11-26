@@ -1,4 +1,4 @@
-package com.jinyshin.ktbcommunity.domain.image.dto;
+package com.jinyshin.ktbcommunity.domain.image.dto.response;
 
 import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
 import java.time.LocalDateTime;
@@ -11,4 +11,5 @@ public record ImageMetadataResponse(
     ImageType imageType,
     LocalDateTime createdAt
 ) {
+
 }

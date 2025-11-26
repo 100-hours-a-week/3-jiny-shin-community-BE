@@ -1,4 +1,4 @@
-package com.jinyshin.ktbcommunity.domain.image.dto;
+package com.jinyshin.ktbcommunity.domain.image.dto.request;
 
 import com.jinyshin.ktbcommunity.domain.image.entity.ImageType;
 import jakarta.validation.constraints.NotBlank;

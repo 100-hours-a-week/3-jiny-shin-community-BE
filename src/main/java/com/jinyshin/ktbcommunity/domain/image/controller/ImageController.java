@@ -2,8 +2,8 @@ package com.jinyshin.ktbcommunity.domain.image.controller;
 
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.IMAGE_METADATA_SAVED;
 
-import com.jinyshin.ktbcommunity.domain.image.dto.ImageMetadataRequest;
-import com.jinyshin.ktbcommunity.domain.image.dto.ImageMetadataResponse;
+import com.jinyshin.ktbcommunity.domain.image.dto.request.ImageMetadataRequest;
+import com.jinyshin.ktbcommunity.domain.image.dto.response.ImageMetadataResponse;
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.domain.image.service.ImageService;
 import com.jinyshin.ktbcommunity.global.api.ApiResponse;

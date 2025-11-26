@@ -1,6 +1,6 @@
 package com.jinyshin.ktbcommunity.domain.image.service;
 
-import com.jinyshin.ktbcommunity.domain.image.dto.ImageMetadataRequest;
+import com.jinyshin.ktbcommunity.domain.image.dto.request.ImageMetadataRequest;
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.domain.image.repository.ImageRepository;
 import com.jinyshin.ktbcommunity.global.exception.ApiErrorCode;
