@@ -60,6 +60,7 @@ jobs:
             SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/ktb_community?useSSL=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
             SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }}
             SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}
+            SPRING_JPA_HIBERNATE_DDL_AUTO=update
             JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC
             TZ=Asia/Seoul
             EOF
