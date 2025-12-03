@@ -25,7 +25,6 @@ public class SessionAuthFilter extends OncePerRequestFilter {
       "/api/auth/login",
       "/api/users/check-email",
       "/api/users/check-nickname",
-      "/api/images/metadata",
       "/actuator/health"
   };
 
