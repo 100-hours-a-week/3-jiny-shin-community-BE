@@ -11,11 +11,6 @@ spring:
       hibernate:
         default_batch_fetch_size: 100
     open-in-view: false
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
 
 cloud:
   aws:
