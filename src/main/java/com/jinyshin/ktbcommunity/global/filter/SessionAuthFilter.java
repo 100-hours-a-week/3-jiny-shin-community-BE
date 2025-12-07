@@ -63,9 +63,8 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     String uri = request.getRequestURI();
     String method = request.getMethod();
 
-    // 비회원 접근 가능한 엔드포인트
-    boolean isPublicReadEndpoint = "GET".equals(method) &&
-        (uri.equals("/api/posts") || uri.startsWith("/api/posts/"));
+    // 비회원 접근 가능한 엔드포인트 (게시글 목록 조회만)
+    boolean isPublicReadEndpoint = "GET".equals(method) && uri.equals("/api/posts");
 
     HttpSession session = request.getSession(false);
 
