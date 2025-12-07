@@ -6,6 +6,7 @@ import com.jinyshin.ktbcommunity.domain.user.dto.request.SignupRequest;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.AvailabilityResponse;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UpdatedProfileResponse;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UserInfoResponse;
+import com.jinyshin.ktbcommunity.domain.user.dto.response.VerifyPasswordResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,6 +19,8 @@ public interface UserService {
   UpdatedProfileResponse updateProfile(Long userId, ProfileUpdateRequest request);
 
   void updatePassword(Long userId, PasswordUpdateRequest passwordUpdateRequest);
+
+  VerifyPasswordResponse verifyPassword(Long userId, String password);
 
   AvailabilityResponse checkEmail(String email);
 

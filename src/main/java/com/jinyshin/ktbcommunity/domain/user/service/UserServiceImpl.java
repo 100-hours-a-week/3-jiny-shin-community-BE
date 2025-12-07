@@ -12,12 +12,14 @@ import com.jinyshin.ktbcommunity.domain.user.dto.request.SignupRequest;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.AvailabilityResponse;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UpdatedProfileResponse;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UserInfoResponse;
+import com.jinyshin.ktbcommunity.domain.user.dto.response.VerifyPasswordResponse;
 import com.jinyshin.ktbcommunity.domain.user.entity.User;
 import com.jinyshin.ktbcommunity.domain.user.repository.UserRepository;
 import com.jinyshin.ktbcommunity.global.exception.BadRequestException;
 import com.jinyshin.ktbcommunity.global.exception.ConflictException;
 import com.jinyshin.ktbcommunity.global.exception.ForbiddenException;
 import com.jinyshin.ktbcommunity.global.exception.ResourceNotFoundException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -153,6 +155,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  @Transactional(readOnly = true)
+  public VerifyPasswordResponse verifyPassword(Long userId, String password) {
+    User user = userRepository.findByUserIdAndDeletedAtIsNull(userId)
+        .orElseThrow(ResourceNotFoundException::user);
+
+    boolean valid = passwordEncoder.matches(password, user.getPasswordHash());
+    return new VerifyPasswordResponse(valid);
+  }
+
+  @Override
   public AvailabilityResponse checkEmail(String email) {
     return new AvailabilityResponse(!userRepository.existsByEmailAndDeletedAtIsNull(email));
   }
@@ -167,7 +179,13 @@ public class UserServiceImpl implements UserService {
   public void deleteUser(Long userId) {
     User user = userRepository.findByUserIdAndDeletedAtIsNull(userId)
         .orElseThrow(ResourceNotFoundException::user);
-    userRepository.delete(user);
+    String anonymizedEmail = "deleted-" + user.getUserId() + "-" + System.currentTimeMillis()
+        + "@example.com";
+    String anonymizedNickname = "deleted-" + user.getUserId();
+    String anonymizedPasswordHash = passwordEncoder.encode("deleted-" + UUID.randomUUID());
+
+    user.anonymize(anonymizedEmail, anonymizedNickname, anonymizedPasswordHash);
+    userRepository.save(user);
   }
 
   @Override

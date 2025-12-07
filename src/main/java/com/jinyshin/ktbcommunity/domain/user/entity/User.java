@@ -71,4 +71,13 @@ public class User extends BaseEntity {
   public void updatePassword(String newPasswordHash) {
     this.passwordHash = newPasswordHash;
   }
+
+  public void anonymize(String anonymizedEmail, String anonymizedNickname,
+      String anonymizedPasswordHash) {
+    this.email = anonymizedEmail;
+    this.nickname = anonymizedNickname;
+    this.passwordHash = anonymizedPasswordHash;
+    this.profileImage = null;
+    this.deletedAt = LocalDateTime.now();
+  }
 }

@@ -20,6 +20,7 @@ public final class ApiMessages {
 
   // Post
   public static final String POSTS_RETRIEVED = "posts_retrieved";
+  public static final String MY_POSTS_RETRIEVED = "my_posts_retrieved";
   public static final String POST_RETRIEVED = "post_retrieved";
   public static final String POST_CREATED = "post_created";
   public static final String POST_UPDATED = "post_updated";
@@ -41,4 +42,11 @@ public final class ApiMessages {
   public static final String IMAGE_RETRIEVED = "이미지 조회 성공";
   public static final String IMAGES_RETRIEVED = "이미지 목록 조회 성공";
   public static final String IMAGE_DELETED = "이미지 삭제 성공";
+
+  // AI Generation
+  public static final String AI_GENERATION_REMAINING = "ai_generation_remaining";
+
+  // Password
+  public static final String PASSWORD_VERIFIED = "비밀번호가 일치합니다.";
+  public static final String PASSWORD_NOT_MATCHED = "비밀번호가 일치하지 않습니다.";
 }

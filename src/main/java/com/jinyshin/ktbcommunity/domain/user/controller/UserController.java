@@ -2,20 +2,25 @@ package com.jinyshin.ktbcommunity.domain.user.controller;
 
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.EMAIL_CHECKED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.NICKNAME_CHECKED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PASSWORD_NOT_MATCHED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PASSWORD_UPDATED;
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PASSWORD_VERIFIED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PROFILE_IMAGE_DELETED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.PROFILE_UPDATED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.SIGNUP_SUCCESS;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.USER_RETRIEVED;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import com.jinyshin.ktbcommunity.domain.user.dto.request.PasswordUpdateRequest;
 import com.jinyshin.ktbcommunity.domain.user.dto.request.ProfileUpdateRequest;
 import com.jinyshin.ktbcommunity.domain.user.dto.request.SignupRequest;
+import com.jinyshin.ktbcommunity.domain.user.dto.request.VerifyPasswordRequest;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.AvailabilityResponse;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UpdatedProfileResponse;
 import com.jinyshin.ktbcommunity.domain.user.dto.response.UserInfoResponse;
+import com.jinyshin.ktbcommunity.domain.user.dto.response.VerifyPasswordResponse;
 import com.jinyshin.ktbcommunity.domain.user.service.UserService;
 import com.jinyshin.ktbcommunity.global.common.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,7 +69,11 @@ public class UserController {
   )
   public ResponseEntity<BaseResponse<UserInfoResponse>> signup(
       @Parameter(description = "회원가입 요청 데이터")
-      @Valid @RequestBody SignupRequest request) {
+      @Valid @RequestBody SignupRequest request,
+      HttpSession session) {
+    // 기존 세션 무효화 (세션 고정 공격 방지)
+    session.invalidate();
+
     UserInfoResponse response = userService.signup(request);
     return ResponseEntity.status(CREATED).body(BaseResponse.success(SIGNUP_SUCCESS, response));
   }
@@ -159,6 +168,40 @@ public class UserController {
       @Valid @RequestBody PasswordUpdateRequest request) {
     userService.updatePassword(userId, request);
     return ResponseEntity.ok(BaseResponse.success(PASSWORD_UPDATED, null));
+  }
+
+  @PostMapping("/me/verify-password")
+  @Operation(
+      summary = "비밀번호 확인",
+      description = "현재 비밀번호 일치 여부를 확인합니다."
+  )
+  @ApiResponse(
+      responseCode = "200",
+      description = "비밀번호가 일치",
+      content = @Content(schema = @Schema(implementation = BaseResponse.class))
+  )
+  @ApiResponse(
+      responseCode = "400",
+      description = "비밀번호 불일치",
+      content = @Content(schema = @Schema(implementation = BaseResponse.class))
+  )
+  @ApiResponse(
+      responseCode = "401",
+      description = "인증 필요",
+      content = @Content(schema = @Schema(implementation = BaseResponse.class))
+  )
+  public ResponseEntity<BaseResponse<VerifyPasswordResponse>> verifyPassword(
+      @Parameter(hidden = true) @RequestAttribute Long userId,
+      @Parameter(description = "비밀번호 확인 요청 데이터")
+      @Valid @RequestBody VerifyPasswordRequest request) {
+    VerifyPasswordResponse response = userService.verifyPassword(userId, request.password());
+
+    if (response.valid()) {
+      return ResponseEntity.ok(BaseResponse.success(PASSWORD_VERIFIED, response));
+    }
+
+    return ResponseEntity.status(BAD_REQUEST)
+        .body(BaseResponse.success(PASSWORD_NOT_MATCHED, response));
   }
 
   @GetMapping("/check-email")
