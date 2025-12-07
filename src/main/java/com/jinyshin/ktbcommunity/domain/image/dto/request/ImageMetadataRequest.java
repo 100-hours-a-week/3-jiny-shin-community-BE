@@ -39,7 +39,13 @@ public record ImageMetadataRequest(
         example = "PROFILE"
     )
     @NotNull(message = "imageType은 필수입니다")
-    ImageType imageType
+    ImageType imageType,
+
+    @Schema(
+        description = "AI 생성 이미지 여부",
+        example = "false"
+    )
+    boolean aiGenerated
 ) {
 
 }

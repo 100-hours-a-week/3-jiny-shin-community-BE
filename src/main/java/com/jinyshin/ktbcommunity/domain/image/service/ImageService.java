@@ -1,5 +1,6 @@
 package com.jinyshin.ktbcommunity.domain.image.service;
 
+import com.jinyshin.ktbcommunity.domain.aigeneration.service.AiGenerationService;
 import com.jinyshin.ktbcommunity.domain.image.dto.request.ImageMetadataRequest;
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.domain.image.repository.ImageRepository;
@@ -18,10 +19,11 @@ public class ImageService {
 
   private final ImageRepository imageRepository;
   private final S3Service s3Service;
+  private final AiGenerationService aiGenerationService;
 
   // Lambda 응답 받고 메타정보 저장
   @Transactional
-  public Image saveMetadata(ImageMetadataRequest request) {
+  public Image saveMetadata(ImageMetadataRequest request, Long userId) {
     // S3 파일 존재 여부 검증 (보안)
     String s3Key = request.s3Path() + "/" + request.storedFilename() + ".jpg";
     if (!s3Service.imageExists(s3Key)) {
@@ -40,6 +42,10 @@ public class ImageService {
     Image savedImage = imageRepository.save(image);
     log.info("이미지 메타정보 저장 완료 - imageId: {}, storedFilename: {}, s3Path: {}",
         savedImage.getImageId(), savedImage.getStoredFilename(), savedImage.getS3Path());
+
+    if (request.aiGenerated()) {
+      aiGenerationService.logUsage(userId, savedImage.getImageId());
+    }
 
     return savedImage;
   }

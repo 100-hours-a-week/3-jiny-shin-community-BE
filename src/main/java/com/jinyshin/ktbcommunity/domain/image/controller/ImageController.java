@@ -11,9 +11,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,9 +50,10 @@ public class ImageController {
   )
   public ResponseEntity<BaseResponse<ImageMetadataResponse>> saveMetadata(
       @Parameter(description = "이미지 메타데이터 요청 데이터")
-      @Valid @RequestBody ImageMetadataRequest request
+      @Valid @RequestBody ImageMetadataRequest request,
+      @Parameter(hidden = true) @RequestAttribute Long userId
   ) {
-    Image image = imageService.saveMetadata(request);
+    Image image = imageService.saveMetadata(request, userId);
 
     ImageMetadataResponse response = new ImageMetadataResponse(
         image.getImageId(),
