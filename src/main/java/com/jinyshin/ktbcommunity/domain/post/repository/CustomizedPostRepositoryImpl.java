@@ -46,6 +46,40 @@ public class CustomizedPostRepositoryImpl implements CustomizedPostRepository {
   }
 
   @Override
+  public List<Post> findMyPostsWithCursor(Long userId, Long cursor, String sort, int limit) {
+    BooleanExpression cursorCondition = getCursorCondition(cursor, sort);
+    BooleanExpression authorCondition = post.author.userId.eq(userId);
+
+    BooleanExpression whereCondition = authorCondition;
+    if (cursorCondition != null) {
+      whereCondition = authorCondition.and(cursorCondition);
+    }
+
+    // Post + author + author.profileImage + postStats (ManyToOne)
+    List<Post> posts = queryFactory
+        .selectFrom(post)
+        .join(post.author, user).fetchJoin()
+        .leftJoin(user.profileImage).fetchJoin()
+        .join(post.postStats, postStats).fetchJoin()
+        .where(whereCondition)
+        .orderBy(sort.equals("asc") ? post.postId.asc() : post.postId.desc())
+        .limit(limit + 1)
+        .fetch();
+
+    // PostImage + Image (OneToMany, 카테시안 곱 방지)
+    if (!posts.isEmpty()) {
+      queryFactory
+          .selectFrom(postImage)
+          .leftJoin(postImage.image).fetchJoin()
+          .where(postImage.post.in(posts))
+          .orderBy(postImage.position.asc())
+          .fetch();
+    }
+
+    return posts;
+  }
+
+  @Override
   public Optional<Post> findByIdWithDetails(Long postId) {
     Post foundPost = queryFactory
         .selectFrom(post)

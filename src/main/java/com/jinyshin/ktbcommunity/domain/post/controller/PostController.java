@@ -1,5 +1,6 @@
 package com.jinyshin.ktbcommunity.domain.post.controller;
 
+import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.MY_POSTS_RETRIEVED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.POST_CREATED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.POST_DELETED;
 import static com.jinyshin.ktbcommunity.global.constants.ApiMessages.POST_RETRIEVED;
@@ -69,6 +70,34 @@ public class PostController {
       @RequestAttribute(required = false) Long userId) {
     PostListResponse response = postService.getPosts(cursor, sort, limit, userId);
     return ResponseEntity.ok(BaseResponse.success(POSTS_RETRIEVED, response));
+  }
+
+  @GetMapping("/posts/me")
+  @Operation(
+      summary = "내 게시글 목록 조회",
+      description = "현재 로그인한 사용자가 작성한 게시글 목록을 커서 기반 페이지네이션으로 조회합니다."
+  )
+  @ApiResponse(
+      responseCode = "200",
+      description = "내 게시글 목록 조회 성공",
+      content = @Content(schema = @Schema(implementation = BaseResponse.class))
+  )
+  @ApiResponse(
+      responseCode = "401",
+      description = "인증 필요",
+      content = @Content(schema = @Schema(implementation = BaseResponse.class))
+  )
+  public ResponseEntity<BaseResponse<PostListResponse>> getMyPosts(
+      @Parameter(description = "커서 (이전 페이지의 마지막 게시글 ID)")
+      @RequestParam(required = false) Long cursor,
+      @Parameter(description = "정렬 방식 (asc: 오래된순, desc: 최신순)", example = "desc")
+      @RequestParam(defaultValue = "desc") String sort,
+      @Parameter(description = "페이지당 게시글 수", example = "10")
+      @RequestParam(defaultValue = "10") int limit,
+      @Parameter(hidden = true)
+      @RequestAttribute Long userId) {
+    PostListResponse response = postService.getMyPosts(userId, cursor, sort, limit);
+    return ResponseEntity.ok(BaseResponse.success(MY_POSTS_RETRIEVED, response));
   }
 
   @GetMapping("/posts/{postId}")

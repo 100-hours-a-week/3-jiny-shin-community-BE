@@ -13,6 +13,8 @@ public interface PostService {
 
   PostListResponse getPosts(Long cursor, String sort, int limit, Long currentUserId);
 
+  PostListResponse getMyPosts(Long userId, Long cursor, String sort, int limit);
+
   PostDetailResponse getPostDetail(Long postId, Long currentUserId);
 
   UpdatedPostResponse updatePost(Long postId, Long userId, UpdatePostRequest request);

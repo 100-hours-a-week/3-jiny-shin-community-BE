@@ -143,7 +143,54 @@ public class PostServiceImpl implements PostService {
         })
         .collect(Collectors.toList());
 
-    return new PostListResponse(hasNext, nextCursor, postInfos);
+    return new PostListResponse(hasNext, nextCursor, postInfos.size(), postInfos);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public PostListResponse getMyPosts(Long userId, Long cursor, String sort, int limit) {
+    if (limit <= 0 || limit > MAX_PAGE_LIMIT) {
+      limit = DEFAULT_PAGE_LIMIT;
+    }
+
+    if (sort == null || (!sort.equals("asc") && !sort.equals("desc"))) {
+      sort = "desc";
+    }
+
+    // limit+1 조회: hasNext 판단을 위해 1개 더 조회
+    List<Post> posts = postRepository.findMyPostsWithCursor(userId, cursor, sort, limit);
+
+    boolean hasNext = posts.size() > limit;
+    if (hasNext) {
+      posts.removeLast();
+    }
+
+    Long nextCursor = hasNext && !posts.isEmpty()
+        ? posts.getLast().getPostId()
+        : null;
+
+    List<PostInfoResponse> postInfos = posts.stream()
+        .map(post -> {
+          // 썸네일 이미지 URL 생성
+          PostImage thumbnailImage = post.getPostImages().stream()
+              .filter(PostImage::isPrimary)
+              .findFirst()
+              .orElse(null);
+
+          ImageUrlsResponse thumbnailUrls = thumbnailImage != null
+              ? imageUrlGenerator.generatePostUrls(thumbnailImage.getImage(), true)
+              : null;
+
+          // 프로필 이미지 URL 생성
+          ImageUrlsResponse profileImageUrls = post.getAuthor().getProfileImage() != null
+              ? imageUrlGenerator.generateProfileUrls(post.getAuthor().getProfileImage())
+              : null;
+
+          return PostMapper.toPostInfo(post, thumbnailUrls, profileImageUrls);
+        })
+        .collect(Collectors.toList());
+
+    return new PostListResponse(hasNext, nextCursor, postInfos.size(), postInfos);
   }
 
   @Override
