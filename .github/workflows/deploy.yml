@@ -66,6 +66,7 @@ jobs:
             CLOUD_AWS_SECRET_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             CLOUD_AWS_REGION=ap-northeast-2
             CLOUD_AWS_BUCKET=${{ secrets.AWS_S3_BUCKET }}
+            CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
             JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC
             TZ=Asia/Seoul
             EOF

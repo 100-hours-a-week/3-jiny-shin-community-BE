@@ -1,21 +1,31 @@
 package com.jinyshin.ktbcommunity.global.config;
 
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+@Getter
+@Setter
 @Configuration
+@ConfigurationProperties(prefix = "cors")
 public class WebMvcConfig implements WebMvcConfigurer {
+
+  private List<String> allowedOrigins = new ArrayList<>();
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")
-        .allowedOrigins("http://localhost:3000") // 프론트엔드 주소
+        .allowedOrigins(allowedOrigins.toArray(new String[0]))
         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         .allowedHeaders("*")
-        .allowCredentials(true) // 쿠키 포함 요청 허용
-        .maxAge(3600); // preflight 요청 캐시 시간
+        .allowCredentials(true)
+        .maxAge(3600);
   }
 
   @Override
