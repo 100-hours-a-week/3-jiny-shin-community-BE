@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -40,6 +41,16 @@ public class GlobalExceptionHandler {
     });
 
     BaseResponse<Void> response = BaseResponse.error("invalid_request", errors);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<BaseResponse<Void>> handleTypeMismatchException(
+      MethodArgumentTypeMismatchException e) {
+    log.warn("Type mismatch error: parameter '{}', value '{}', required type '{}'",
+        e.getName(), e.getValue(), e.getRequiredType());
+
+    BaseResponse<Void> response = BaseResponse.error("invalid_parameter_type");
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
