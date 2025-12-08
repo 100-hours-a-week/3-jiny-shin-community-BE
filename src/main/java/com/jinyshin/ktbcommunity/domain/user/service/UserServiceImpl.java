@@ -1,10 +1,12 @@
 package com.jinyshin.ktbcommunity.domain.user.service;
 
+import com.jinyshin.ktbcommunity.domain.comment.repository.CommentRepository;
 import com.jinyshin.ktbcommunity.domain.image.dto.response.ImageUrlsResponse;
 import com.jinyshin.ktbcommunity.domain.image.entity.Image;
 import com.jinyshin.ktbcommunity.domain.image.entity.ImageStatus;
 import com.jinyshin.ktbcommunity.domain.image.repository.ImageRepository;
 import com.jinyshin.ktbcommunity.domain.image.util.ImageUrlGenerator;
+import com.jinyshin.ktbcommunity.domain.post.repository.PostRepository;
 import com.jinyshin.ktbcommunity.domain.user.dto.UserMapper;
 import com.jinyshin.ktbcommunity.domain.user.dto.request.PasswordUpdateRequest;
 import com.jinyshin.ktbcommunity.domain.user.dto.request.ProfileUpdateRequest;
@@ -19,6 +21,7 @@ import com.jinyshin.ktbcommunity.global.exception.BadRequestException;
 import com.jinyshin.ktbcommunity.global.exception.ConflictException;
 import com.jinyshin.ktbcommunity.global.exception.ForbiddenException;
 import com.jinyshin.ktbcommunity.global.exception.ResourceNotFoundException;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +37,8 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
   private final ImageRepository imageRepository;
   private final ImageUrlGenerator imageUrlGenerator;
+  private final CommentRepository commentRepository;
+  private final PostRepository postRepository;
 
   @Override
   @Transactional
@@ -179,6 +184,10 @@ public class UserServiceImpl implements UserService {
   public void deleteUser(Long userId) {
     User user = userRepository.findByUserIdAndDeletedAtIsNull(userId)
         .orElseThrow(ResourceNotFoundException::user);
+
+    // 탈퇴 사용자의 댓글이 속한 게시글들의 commentCount 감소
+    decrementCommentCountsForUser(userId);
+
     String anonymizedEmail = "deleted-" + user.getUserId() + "-" + System.currentTimeMillis()
         + "@example.com";
     String anonymizedNickname = "deleted-" + user.getUserId();
@@ -186,6 +195,19 @@ public class UserServiceImpl implements UserService {
 
     user.anonymize(anonymizedEmail, anonymizedNickname, anonymizedPasswordHash);
     userRepository.save(user);
+  }
+
+  /**
+   * 탈퇴하는 사용자가 작성한 댓글 수를 각 게시글의 PostStats에서 감소시킵니다.
+   */
+  private void decrementCommentCountsForUser(Long userId) {
+    Map<Long, Long> commentCountsByPost = commentRepository.countCommentsByAuthorGroupByPost(userId);
+
+    commentCountsByPost.forEach((postId, count) ->
+        postRepository.findByIdWithStats(postId).ifPresent(post ->
+            post.getPostStats().decrementCommentCountBy(count.intValue())
+        )
+    );
   }
 
   @Override
