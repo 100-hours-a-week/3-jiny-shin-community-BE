@@ -46,6 +46,10 @@ public final class ApiMessages {
   // AI Generation
   public static final String AI_GENERATION_REMAINING = "ai_generation_remaining";
 
+  // Admin
+  public static final String ADMIN_POST_DELETED = "admin_post_deleted";
+  public static final String ADMIN_COMMENT_DELETED = "admin_comment_deleted";
+
   // Password
   public static final String PASSWORD_VERIFIED = "비밀번호가 일치합니다.";
   public static final String PASSWORD_NOT_MATCHED = "비밀번호가 일치하지 않습니다.";
