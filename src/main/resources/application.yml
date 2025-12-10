@@ -16,6 +16,10 @@ cloud:
   aws:
     region: ap-northeast-2
     bucket: ktb-community-images
+    ses:
+      from-email: ${SES_FROM_EMAIL:noreply@example.com}
+      to-email: ${SES_TO_EMAIL:developer@example.com}
+      enabled: ${SES_ENABLED:false}
 
 server:
   servlet:

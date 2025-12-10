@@ -27,3 +27,7 @@ cloud:
     secret-key: test-secret-key
     region: ap-northeast-2
     bucket: test-bucket
+    ses:
+      from-email: test@example.com
+      to-email: developer@example.com
+      enabled: false
